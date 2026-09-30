@@ -1,0 +1,36 @@
+{% extends 'refy/base.html' %}
+{% block title %}Каталог курсов: цены, отзывы, сравнение{% endblock %}
+{% block description %}Честный каталог курсов по разным направлениям: цены, отзывы студентов и практика в одном месте.{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <h1>Найди свой курс</h1>
+      <p class="hero-sub">Честный каталог: цены, отзывы и практика в одном месте. Выберите направление и сравните программы.</p>
+      <div class="hero-cta"><a href="#sections" class="btn btn-accent">Выбрать направление</a></div>
+    </div>
+    <aside class="panel">
+      <h2>Как мы выбираем курсы</h2>
+      <ul>
+        <li><b>Практика и супервизия</b>Курс учит работать с клиентами, а не только читать лекции.</li>
+        <li><b>Понятные условия</b>Формат, документ об окончании и рассрочка видны в карточке.</li>
+        <li><b>Отзывы студентов</b>Смотрим, что говорят те, кто уже прошёл программу.</li>
+      </ul>
+      <p class="note">Мы получаем комиссию от школ. Для вас цена не меняется.</p>
+    </aside>
+  </div>
+</section>
+<section id="sections">
+  <div class="container">
+    <h2 class="section-title">Направления</h2>
+    <p class="section-sub">Откройте раздел, чтобы увидеть курсы, сравнение и отзывы</p>
+    <div class="tiles">
+      {% for s in sections %}
+      <a class="tile" href="{{ s.get_absolute_url }}"><h3>{{ s.title }}</h3><p>{{ s.summary }}</p><span>Курсов: {{ s.n }}</span></a>
+      {% empty %}
+      <p>Разделы пока не добавлены.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% load static %}<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Каталог курсов{% endblock %}</title>
+<meta name="description" content="{% block description %}{% endblock %}">
+<link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+{% block head %}{% endblock %}
+</head>
+<body>
+<header>
+  <div class="container header-inner">
+    <a href="{% url 'refy:home' %}" class="logo">Каталог курсов</a>
+    <nav aria-label="Основное меню">
+      <a href="{% url 'refy:home' %}#sections">Разделы</a>
+      {% block nav_extra %}{% endblock %}
+      <a href="#contacts">Контакты</a>
+    </nav>
+    <a href="{% url 'refy:home' %}#sections" class="btn btn-primary btn-small hd-cta">Подобрать курс</a>
+  </div>
+</header>
+{% block content %}{% endblock %}
+<footer id="contacts">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <h4>Каталог курсов</h4>
+        <p>Честный каталог курсов по разным направлениям. Сравнение, отзывы, цены. Обновляется ежемесячно.</p>
+      </div>
+      <div>
+        <h4>Разделы</h4>
+        <a href="{% url 'refy:home' %}#sections">Все направления</a>
+        <a href="#">Блог</a>
+      </div>
+      <div>
+        <h4>Направления</h4>
+        {% for s in nav_sections %}<a href="{{ s.get_absolute_url }}">{{ s.title }}</a>{% endfor %}
+      </div>
+      <div>
+        <h4>Контакты</h4>
+        <a href="https://t.me/">Telegram</a>
+        <a href="mailto:info@psihologiakursy.ru">Email</a>
+        <a href="#">Вконтакте</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      © {% now "Y" %} Каталог курсов. Мы получаем комиссию от партнёров — это не влияет на цену для вас. Все права защищены.
+    </div>
+  </div>
+</footer>
+{% block scripts %}{% endblock %}
+</body>
+</html>

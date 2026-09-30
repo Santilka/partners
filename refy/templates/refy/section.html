@@ -1,0 +1,86 @@
+{% extends 'refy/base.html' %}
+{% block title %}{{ section.seo_title|default:section.title }} — каталог курсов{% endblock %}
+{% block description %}{{ section.seo_description|default:section.summary }}{% endblock %}
+{% block nav_extra %}<a href="#compare">Сравнение</a><a href="#faq">Вопросы</a>{% endblock %}
+{% block content %}
+<section id="catalog">
+  <div class="container">
+    <a class="crumb" href="{% url 'refy:home' %}#sections">Все направления</a>
+    <h1 class="section-title">{{ section.title }}</h1>
+    <p class="section-sub">{{ section.summary }}</p>
+    <div class="filters" role="group" aria-label="Фильтр курсов">
+      <button class="chip on" data-f="all" aria-pressed="true">Все</button>
+      <button class="chip" data-f="online" aria-pressed="false">Онлайн</button>
+      <button class="chip" data-f="diploma" aria-pressed="false">С дипломом</button>
+      <button class="chip" data-f="short" aria-pressed="false">До 6 месяцев</button>
+    </div>
+    <div class="cards-grid">
+      {% for c in courses %}
+      <article class="card"{% if c.is_online %} data-online="1"{% endif %}{% if c.has_diploma %} data-diploma="1"{% endif %}{% if c.is_short %} data-short="1"{% endif %}>
+        {% if c.tag %}<span class="card-tag">{{ c.tag }}</span>{% endif %}
+        <h3>{{ c.title }}</h3>
+        <div class="card-meta"><strong>Школа:</strong> {{ c.school }}</div>
+        {% if c.audience %}<div class="card-meta"><strong>Для кого:</strong> {{ c.audience }}</div>{% endif %}
+        <div class="card-meta"><strong>Длительность:</strong> {{ c.duration_months }} мес.</div>
+        <div class="card-meta"><strong>Формат:</strong> {{ c.get_format_display|lower }}{% if c.format_note %} + {{ c.format_note }}{% endif %}</div>
+        {% if c.document %}<div class="card-meta"><strong>Документ:</strong> {{ c.document }}</div>{% endif %}
+        <div class="card-price">{{ c.price|default:"Цена по запросу" }}{% if c.installment %} <small>или рассрочка</small>{% endif %}</div>
+        {% if c.rating %}<div class="card-rating"><b>{{ c.rating }}</b> {{ c.reviews_count }} отзывов</div>{% endif %}
+        <div class="card-actions">
+          {% if c.details_url %}<a href="{{ c.details_url }}" target="_blank" rel="nofollow sponsored noopener" class="btn btn-primary btn-small">Подробнее</a>{% endif %}
+          {% if c.school_url %}<a href="{{ c.school_url }}" target="_blank" rel="nofollow sponsored noopener" class="btn btn-outline btn-small">На сайт школы</a>{% endif %}
+        </div>
+      </article>
+      {% empty %}
+      <p>Курсы в этом разделе скоро появятся.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% if courses %}
+<section id="compare">
+  <div class="container">
+    <h2 class="section-title">Сравнение курсов</h2>
+    <div class="compare-wrap">
+      <table class="compare-table">
+        <thead><tr><th>Курс</th><th>Школа</th><th>Длительность</th><th>Формат</th><th>Цена</th><th></th></tr></thead>
+        <tbody>
+          {% for c in courses %}
+          <tr><td>{{ c.title }}</td><td>{{ c.school }}</td><td>{{ c.duration_months }} мес.</td><td>{{ c.get_format_display }}</td><td>{{ c.price|default:"—" }}</td><td>{% if c.details_url %}<a href="{{ c.details_url }}" target="_blank" rel="nofollow sponsored noopener">Подробнее</a>{% endif %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endif %}
+{% if reviews %}
+<section class="alt">
+  <div class="container">
+    <h2 class="section-title">Отзывы студентов</h2>
+    <div class="reviews-grid">
+      {% for r in reviews %}
+      <div class="review"><p class="review-text">«{{ r.text }}»</p><div class="review-author">{{ r.author }}</div><div class="review-course">{{ r.course.title }}</div></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+{% if section.seo_text %}
+<section>
+  <div class="container narrow"><div class="seo-text">{{ section.seo_text|safe }}</div></div>
+</section>
+{% endif %}
+{% if faqs %}
+<section id="faq" class="alt">
+  <div class="container narrow">
+    <h2 class="section-title">Частые вопросы</h2>
+    {% for f in faqs %}
+    <details class="faq-item"><summary class="faq-question">{{ f.question }}</summary><div class="faq-answer">{{ f.answer|linebreaksbr }}</div></details>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+{% include 'refy/_cta.html' %}
+{% endblock %}
+{% block scripts %}{% load static %}<script src="{% static 'js/filters.js' %}"></script>{% endblock %}
