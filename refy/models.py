@@ -27,7 +27,6 @@ class Section(models.Model):
 class Course(models.Model):
     FORMATS = [('online', 'Онлайн'), ('hybrid', 'Гибрид'), ('offline', 'Очно')]
 
-    section = models.ForeignKey(Section, related_name='courses', on_delete=models.CASCADE)
     tag = models.CharField(max_length=60, blank=True)
     title = models.CharField(max_length=200)
     school = models.CharField(max_length=120)
@@ -78,6 +77,19 @@ class Review(models.Model):
     def __str__(self):
         return self.author
 
+class CourseSection(models.Model):
+    course = models.ForeignKey(Course, related_name='course_sections', on_delete=models.CASCADE)
+    section = models.ForeignKey(Section, related_name='course_sections', on_delete=models.CASCADE)
+    position = models.PositiveIntegerField('Порядок', default=0)
+
+    class Meta:
+        unique_together = ('course', 'section')
+        ordering = ['position']
+        verbose_name = 'Курс в разделе'
+        verbose_name_plural = 'Курсы в разделах'
+
+    def __str__(self):
+        return f'{self.course.title} → {self.section.title}'
 
 class Faq(models.Model):
     section = models.ForeignKey(Section, related_name='faqs', on_delete=models.CASCADE)
