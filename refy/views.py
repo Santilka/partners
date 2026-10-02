@@ -1,16 +1,30 @@
-from django.db.models import Case, IntegerField, Q, When
+from django.db.models import Case, Count, IntegerField, OuterRef, Q, Subquery, When
+from django.db.models.functions import Coalesce
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 
-from .models import Category, Course, CourseSection, Review, Section
+from .models import Category, Course, CourseSection, Review, School, SchoolReview, Section
 
 HOME_TILES = 8
 FEATURED = 6
 SEARCH_LIMIT = 60
 
 
+def with_review_flags(qs):
+    return qs.annotate(
+        reviews_n=Count('reviews', distinct=True),
+        school_reviews_n=Coalesce(Subquery(
+            SchoolReview.objects.filter(school__title=OuterRef('school'))
+            .order_by().values('school__title').annotate(n=Count('pk')).values('n')[:1]
+        ), 0),
+        school_slug=Subquery(
+            School.objects.filter(title=OuterRef('school'), reviews__isnull=False).values('slug')[:1]
+        ),
+    )
+
+
 def random_courses(limit=FEATURED):
-    base = Course.objects.filter(is_active=True)
+    base = with_review_flags(Course.objects.filter(is_active=True))
     items = list(base.exclude(tag='').order_by('?')[:limit])
     if len(items) < limit:
         items += list(base.filter(tag='').order_by('?')[:limit - len(items)])
@@ -51,7 +65,7 @@ def search(request):
             match_any |= m
             cases.append(Case(When(m, then=1), default=0, output_field=IntegerField()))
         courses = (
-            Course.objects.filter(is_active=True).filter(match_any)
+            with_review_flags(Course.objects.filter(is_active=True)).filter(match_any)
             .annotate(score=sum(cases))
             .order_by('-score', 'position', 'title')[:SEARCH_LIMIT]
         )
@@ -77,9 +91,22 @@ def course_detail(request, slug):
     link = (obj.course_sections
             .filter(section__is_active=True, section__category__is_active=True)
             .select_related('section__category').first())
+    school_obj = School.objects.filter(title=obj.school).first()
     return render(request, 'refy/course.html', {
         'course': obj,
         'parent': link.section if link else None,
+        'reviews': obj.reviews.all(),
+        'school_obj': school_obj,
+        'school_reviews_n': school_obj.reviews.count() if school_obj else 0,
+    })
+
+
+def school_detail(request, slug):
+    obj = get_object_or_404(School, slug=slug)
+    courses = with_review_flags(Course.objects.filter(is_active=True, school=obj.title))
+    return render(request, 'refy/school.html', {
+        'school': obj,
+        'courses': courses,
         'reviews': obj.reviews.all(),
     })
 
@@ -90,13 +117,13 @@ def section(request, category_slug, slug):
         slug=slug, category__slug=category_slug,
         category__is_active=True, is_active=True,
     )
-    courses = Course.objects.filter(
+    base = Course.objects.filter(
         course_sections__section=obj,
         is_active=True,
     ).distinct()
     return render(request, 'refy/section.html', {
         'section': obj,
-        'courses': courses,
-        'reviews': Review.objects.filter(course__in=courses)[:3],
+        'courses': with_review_flags(base),
+        'reviews': Review.objects.filter(course__in=base)[:3],
         'faqs': obj.faqs.all(),
     })

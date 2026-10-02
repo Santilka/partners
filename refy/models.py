@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
 
-RESERVED_SLUGS = {'search', 'kursy'}
+RESERVED_SLUGS = {'search', 'kursy', 'shkoly'}
 
 
 class Category(models.Model):
@@ -59,6 +59,50 @@ class Section(models.Model):
         return reverse('refy:home')
 
 
+class School(models.Model):
+    title = models.CharField('Название', max_length=120, unique=True)
+    slug = models.SlugField('Адрес страницы', max_length=120, unique=True, null=True, blank=True)
+
+    class Meta:
+        ordering = ['title']
+        verbose_name = 'Школа'
+        verbose_name_plural = 'Школы'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._old_title = self.title
+
+    def __str__(self):
+        return self.title
+
+    def save(self, *args, **kwargs):
+        old = self._old_title
+        super().save(*args, **kwargs)
+        if not self.slug:
+            self.slug = f'shkola-{self.pk}'
+            super().save(update_fields=['slug'])
+        if old and old != self.title:
+            Course.objects.filter(school=old).update(school=self.title)
+        self._old_title = self.title
+
+    def get_absolute_url(self):
+        return reverse('refy:school', args=[self.slug]) if self.slug else ''
+
+
+class SchoolReview(models.Model):
+    school = models.ForeignKey(School, related_name='reviews',
+                               on_delete=models.CASCADE, verbose_name='Школа')
+    author = models.CharField('Автор', max_length=120)
+    text = models.TextField('Текст отзыва')
+
+    class Meta:
+        verbose_name = 'Отзыв о школе'
+        verbose_name_plural = 'Отзывы о школах'
+
+    def __str__(self):
+        return self.author
+
+
 class Course(models.Model):
     FORMATS = [('online', 'Онлайн'), ('webinar', 'Вебинар'), ('hybrid', 'Гибрид (онлайн + вебинар)')]
 
@@ -75,7 +119,6 @@ class Course(models.Model):
     price = models.CharField('Цена', max_length=60, blank=True)
     installment = models.BooleanField('Рассрочка', default=False)
     rating = models.DecimalField('Рейтинг', max_digits=2, decimal_places=1, null=True, blank=True)
-    reviews_count = models.PositiveIntegerField('Количество отзывов', default=0)
     details_url = models.URLField('Ссылка на детали', blank=True)
     position = models.PositiveIntegerField('Порядок', default=0)
     is_active = models.BooleanField('Активен', default=True)

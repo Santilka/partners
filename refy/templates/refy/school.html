@@ -1,0 +1,28 @@
+{% extends 'refy/base.html' %}
+{% block title %}{{ school.title }} — курсы и отзывы{% endblock %}
+{% block description %}Курсы школы {{ school.title }}: цены, длительность, формат обучения и отзывы студентов.{% endblock %}
+{% block content %}
+<section>
+  <div class="container">
+    <a class="crumb" href="{% url 'refy:home' %}#sections">Все направления</a>
+    <h1 class="section-title">{{ school.title }}</h1>
+    <p class="section-sub">Курсы школы</p>
+    <div class="cards-grid">
+      {% for c in courses %}{% include 'refy/_course_card.html' %}{% empty %}<p>Курсы школы скоро появятся.</p>{% endfor %}
+    </div>
+  </div>
+</section>
+{% if reviews %}
+<section id="reviews" class="alt">
+  <div class="container">
+    <h2 class="section-title">Отзывы о школе</h2>
+    <div class="reviews-grid">
+      {% for r in reviews %}
+      <div class="review"><p class="review-text">«{{ r.text }}»</p><div class="review-author">{{ r.author }}</div></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+{% include 'refy/_cta.html' %}
+{% endblock %}

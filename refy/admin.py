@@ -1,10 +1,20 @@
 from django.contrib import admin
 from django import forms
 
-from .models import Category, Course, CourseSection, Faq, Review, Section
+from .models import Category, Course, CourseSection, Faq, Review, School, SchoolReview, Section
 
 
 class CourseAdminForm(forms.ModelForm):
+    school = forms.ChoiceField(label='Школа', help_text='Сначала добавьте школу в разделе «Школы»')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        titles = list(School.objects.values_list('title', flat=True))
+        current = self.instance.school if self.instance.pk else ''
+        if current and current not in titles:
+            titles.append(current)
+        self.fields['school'].choices = [('', '---------')] + [(t, t) for t in titles]
+
     class Meta:
         model = Course
         fields = '__all__'
@@ -16,10 +26,6 @@ class CourseAdminForm(forms.ModelForm):
             'title': forms.TextInput(attrs={
                 'placeholder': 'Название курса',
                 'style': 'width: 550px;'
-            }),
-            'school': forms.TextInput(attrs={
-                'placeholder': 'Название школы / платформы',
-                'style': 'width: 450px;'
             }),
             'audience': forms.TextInput(attrs={
                 'placeholder': 'Для кого: новички, разработчики...',
@@ -50,10 +56,6 @@ class CourseAdminForm(forms.ModelForm):
                 'step': '0.1',
                 'style': 'width: 100px;'
             }),
-            'reviews_count': forms.NumberInput(attrs={
-                'placeholder': '124',
-                'style': 'width: 100px;'
-            }),
             'details_url': forms.URLInput(attrs={
                 'placeholder': 'https://...',
                 'style': 'width: 550px;'
@@ -72,6 +74,11 @@ class FaqInline(admin.TabularInline):
 
 class ReviewInline(admin.StackedInline):
     model = Review
+    extra = 1
+
+
+class SchoolReviewInline(admin.StackedInline):
+    model = SchoolReview
     extra = 1
 
 
@@ -122,6 +129,27 @@ class ReviewAdmin(admin.ModelAdmin):
     list_select_related = ('course',)
     search_fields = ('author', 'text', 'course__title')
     autocomplete_fields = ('course',)
+
+    @admin.display(description='Текст')
+    def short_text(self, obj):
+        return obj.text[:80]
+
+
+@admin.register(School)
+class SchoolAdmin(admin.ModelAdmin):
+    list_display = ('title', 'slug')
+    prepopulated_fields = {'slug': ('title',)}
+    search_fields = ('title',)
+    inlines = [SchoolReviewInline]
+
+
+@admin.register(SchoolReview)
+class SchoolReviewAdmin(admin.ModelAdmin):
+    list_display = ('author', 'school', 'short_text')
+    list_filter = ('school',)
+    list_select_related = ('school',)
+    search_fields = ('author', 'text', 'school__title')
+    autocomplete_fields = ('school',)
 
     @admin.display(description='Текст')
     def short_text(self, obj):
