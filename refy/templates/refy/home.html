@@ -6,8 +6,8 @@
   <div class="container hero-grid">
     <div>
       <h1>Найди свой курс</h1>
-      <p class="hero-sub">Честный каталог: цены, отзывы и практика в одном месте. Выберите направление и сравните программы.</p>
-      <div class="hero-cta"><a href="#sections" class="btn btn-accent">Выбрать направление</a></div>
+      <p class="hero-sub">Честный каталог: цены, отзывы и практика в одном месте. Введите профессию или тему и сравните программы.</p>
+      {% include 'refy/_search_form.html' %}
     </div>
     <aside class="panel">
       <h2>Как мы выбираем курсы</h2>
@@ -20,17 +20,31 @@
     </aside>
   </div>
 </section>
+{% if featured %}
+<section id="featured" class="alt">
+  <div class="container">
+    <h2 class="section-title">Подборка курсов</h2>
+    <p class="section-sub">Случайные курсы из каталога, популярные отмечены тегами</p>
+    <div class="cards-grid">
+      {% for c in featured %}{% include 'refy/_course_card.html' %}{% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
 <section id="sections">
   <div class="container">
-    <h2 class="section-title">Направления</h2>
-    <p class="section-sub">Откройте раздел, чтобы увидеть курсы, сравнение и отзывы</p>
-    <div class="tiles">
-      {% for s in sections %}
-      <a class="tile" href="{{ s.get_absolute_url }}"><h3>{{ s.title }}</h3><p>{{ s.summary }}</p><span>Курсов: {{ s.n }}</span></a>
-      {% empty %}
-      <p>Разделы пока не добавлены.</p>
-      {% endfor %}
+    {% for g in groups %}
+    <div class="cat-block">
+      <h2 class="section-title"><a href="{{ g.category.get_absolute_url }}">{{ g.category.title }}</a></h2>
+      {% if g.category.summary %}<p class="section-sub">{{ g.category.summary }}</p>{% endif %}
+      <div class="ptiles">
+        {% for s in g.sections %}{% include 'refy/_section_tile.html' %}{% endfor %}
+      </div>
+      {% if g.total > g.sections|length %}<a class="more-link" href="{{ g.category.get_absolute_url }}">Все {{ g.total }} →</a>{% endif %}
     </div>
+    {% empty %}
+    <p>Разделы пока не добавлены.</p>
+    {% endfor %}
   </div>
 </section>
 {% endblock %}

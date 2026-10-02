@@ -1,0 +1,21 @@
+{% extends 'refy/base.html' %}
+{% block title %}{{ category.seo_title|default:category.title }} — каталог курсов{% endblock %}
+{% block description %}{{ category.seo_description|default:category.summary }}{% endblock %}
+{% block content %}
+<section>
+  <div class="container">
+    <a class="crumb" href="{% url 'refy:home' %}#sections">Все направления</a>
+    <h1 class="section-title">{{ category.title }}</h1>
+    {% if category.summary %}<p class="section-sub">{{ category.summary }}</p>{% endif %}
+    <div class="ptiles">
+      {% for s in sections %}{% include 'refy/_section_tile.html' %}{% empty %}<p>Разделы скоро появятся.</p>{% endfor %}
+    </div>
+  </div>
+</section>
+{% if category.seo_text %}
+<section class="alt">
+  <div class="container narrow"><div class="seo-text">{{ category.seo_text|safe }}</div></div>
+</section>
+{% endif %}
+{% include 'refy/_cta.html' %}
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'refy/base.html' %}
+{% block title %}{% if q %}Поиск: {{ q }}{% else %}Поиск курсов{% endif %} — каталог курсов{% endblock %}
+{% block head %}<meta name="robots" content="noindex,follow">{% endblock %}
+{% block content %}
+<section>
+  <div class="container">
+    <a class="crumb" href="{% url 'refy:home' %}">На главную</a>
+    <h1 class="section-title">Поиск курсов</h1>
+    {% include 'refy/_search_form.html' %}
+    <div class="search-results">
+      {% if searched %}
+        {% if courses %}
+        <div class="cards-grid">
+          {% for c in courses %}{% include 'refy/_course_card.html' %}{% endfor %}
+        </div>
+        {% else %}
+        <p>По запросу «{{ q }}» ничего не нашли. Попробуйте другое слово или выберите направление на <a href="{% url 'refy:home' %}#sections">главной</a>.</p>
+        {% endif %}
+      {% else %}
+      <p>Введите название профессии, школы или тему курса.</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

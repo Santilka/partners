@@ -1,11 +1,44 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
 
+RESERVED_SLUGS = {'search'}
 
-class Section(models.Model):
+
+class Category(models.Model):
     title = models.CharField('Название', max_length=120)
     slug = models.SlugField(unique=True)
     summary = models.CharField('Краткое описание', max_length=200, blank=True)
+    seo_title = models.CharField(max_length=160, blank=True)
+    seo_description = models.CharField(max_length=300, blank=True)
+    seo_text = models.TextField('SEO-текст (HTML)', blank=True)
+    position = models.PositiveIntegerField('Порядок', default=0)
+    is_active = models.BooleanField('Показывать', default=True)
+
+    class Meta:
+        ordering = ['position', 'title']
+        verbose_name = 'Главный раздел'
+        verbose_name_plural = 'Главные разделы'
+
+    def __str__(self):
+        return self.title
+
+    def clean(self):
+        if self.slug in RESERVED_SLUGS:
+            raise ValidationError({'slug': 'Этот адрес зарезервирован'})
+
+    def get_absolute_url(self):
+        return reverse('refy:category', args=[self.slug])
+
+
+class Section(models.Model):
+    category = models.ForeignKey(Category, related_name='sections', null=True,
+                                 on_delete=models.PROTECT,
+                                 verbose_name='Главный раздел')
+    title = models.CharField('Название', max_length=120)
+    slug = models.SlugField(unique=True)
+    summary = models.CharField('Краткое описание', max_length=200, blank=True)
+    icon = models.FileField('Иконка', upload_to='refy/icons/', blank=True)
     seo_title = models.CharField(max_length=160, blank=True)
     seo_description = models.CharField(max_length=300, blank=True)
     seo_text = models.TextField('SEO-текст (HTML)', blank=True)
@@ -21,17 +54,20 @@ class Section(models.Model):
         return self.title
 
     def get_absolute_url(self):
-        return reverse('refy:section', args=[self.slug])
+        if self.category_id:
+            return reverse('refy:section', args=[self.category.slug, self.slug])
+        return reverse('refy:home')
 
 
 class Course(models.Model):
-    FORMATS = [('online', 'Онлайн'), ('hybrid', 'Гибрид'), ('offline', 'Очно')]
+    FORMATS = [('online', 'Онлайн'), ('webinar', 'Вебинар'), ('hybrid', 'Гибрид (онлайн + вебинар)')]
 
     tag = models.CharField('Тег', max_length=60, blank=True)
     title = models.CharField('Название', max_length=200)
     school = models.CharField('Школа', max_length=120)
     audience = models.CharField('Аудитория', max_length=120, blank=True)
-    duration_months = models.PositiveSmallIntegerField('Продолжительность (месяцы)')
+    duration_months = models.PositiveSmallIntegerField('Продолжительность (месяцы)', null=True, blank=True)
+    duration_days = models.PositiveSmallIntegerField('Продолжительность (дни)', null=True, blank=True)
     format = models.CharField('Формат', max_length=10, choices=FORMATS, default='online')
     format_note = models.CharField("Примечание к формату", max_length=80, blank=True)
     document = models.CharField('Выдаваемый Документ', max_length=60, blank=True)
@@ -60,9 +96,25 @@ class Course(models.Model):
     def has_diploma(self):
         return 'диплом' in self.document.lower()
 
+    def clean(self):
+        if bool(self.duration_months) == bool(self.duration_days):
+            raise ValidationError('Укажите длительность либо в месяцах, либо в днях.')
+
+    @property
+    def duration_display(self):
+        if self.duration_months:
+            return f'{self.duration_months} мес.'
+        if self.duration_days:
+            return f'{self.duration_days} дн.'
+        return ''
+
     @property
     def is_short(self):
-        return self.duration_months <= 6
+        if self.duration_months:
+            return self.duration_months <= 6
+        if self.duration_days:
+            return self.duration_days <= 180
+        return False
 
 
 class Review(models.Model):

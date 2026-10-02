@@ -1,0 +1,4 @@
+<form class="search" action="{% url 'refy:search' %}" method="get" role="search">
+  <input type="search" name="q" value="{{ q|default:'' }}" placeholder="Например: обучение SEO" aria-label="Поиск курсов" maxlength="100">
+  <button type="submit" class="btn btn-accent">Найти</button>
+</form>

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django import forms
 
-from .models import Course, CourseSection, Faq, Review, Section
+from .models import Category, Course, CourseSection, Faq, Review, Section
 
 
 class CourseAdminForm(forms.ModelForm):
@@ -27,6 +27,10 @@ class CourseAdminForm(forms.ModelForm):
             }),
             'duration_months': forms.NumberInput(attrs={
                 'placeholder': 'Например: 6',
+                'style': 'width: 120px;'
+            }),
+            'duration_days': forms.NumberInput(attrs={
+                'placeholder': 'Например: 21',
                 'style': 'width: 120px;'
             }),
             'format_note': forms.TextInput(attrs={
@@ -84,9 +88,17 @@ class CourseSectionInlineForSection(admin.TabularInline):
     fk_name = 'section'
 
 
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('title', 'slug', 'position', 'is_active')
+    prepopulated_fields = {'slug': ('title',)}
+    search_fields = ('title',)
+
+
 @admin.register(Section)
 class SectionAdmin(admin.ModelAdmin):
-    list_display = ('title', 'slug', 'position', 'is_active')
+    list_display = ('title', 'category', 'slug', 'position', 'is_active')
+    list_filter = ('category', 'is_active')
     prepopulated_fields = {'slug': ('title',)}
     inlines = [FaqInline, CourseSectionInlineForSection]
     search_fields = ('title',)
@@ -95,7 +107,7 @@ class SectionAdmin(admin.ModelAdmin):
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
     form = CourseAdminForm
-    list_display = ('title', 'school', 'duration_months', 'is_active')
+    list_display = ('title', 'school', 'duration_months', 'duration_days', 'is_active')
     list_filter = ('format', 'is_active')
     search_fields = ('title', 'school')
     inlines = [CourseSectionInlineForCourse]
