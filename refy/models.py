@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
 
-RESERVED_SLUGS = {'search'}
+RESERVED_SLUGS = {'search', 'kursy'}
 
 
 class Category(models.Model):
@@ -64,6 +64,7 @@ class Course(models.Model):
 
     tag = models.CharField('Тег', max_length=60, blank=True)
     title = models.CharField('Название', max_length=200)
+    slug = models.SlugField('Адрес страницы', max_length=200, unique=True, null=True, blank=True)
     school = models.CharField('Школа', max_length=120)
     audience = models.CharField('Аудитория', max_length=120, blank=True)
     duration_months = models.PositiveSmallIntegerField('Продолжительность (месяцы)', null=True, blank=True)
@@ -76,7 +77,6 @@ class Course(models.Model):
     rating = models.DecimalField('Рейтинг', max_digits=2, decimal_places=1, null=True, blank=True)
     reviews_count = models.PositiveIntegerField('Количество отзывов', default=0)
     details_url = models.URLField('Ссылка на детали', blank=True)
-    school_url = models.URLField('Ссылка на школу', blank=True)
     position = models.PositiveIntegerField('Порядок', default=0)
     is_active = models.BooleanField('Активен', default=True)
 
@@ -87,6 +87,15 @@ class Course(models.Model):
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if not self.slug:
+            self.slug = f'kurs-{self.pk}'
+            super().save(update_fields=['slug'])
+
+    def get_absolute_url(self):
+        return reverse('refy:course', args=[self.slug]) if self.slug else ''
 
     @property
     def is_online(self):

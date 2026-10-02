@@ -6,6 +6,7 @@ app_name = 'refy'
 urlpatterns = [
     path('', views.home, name='home'),
     path('search/', views.search, name='search'),
+    path('kursy/<slug:slug>/', views.course_detail, name='course'),
     path('<slug:category_slug>/', views.category, name='category'),
     path('<slug:category_slug>/<slug:slug>/', views.section, name='section'),
 ]

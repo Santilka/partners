@@ -58,10 +58,6 @@ class CourseAdminForm(forms.ModelForm):
                 'placeholder': 'https://...',
                 'style': 'width: 550px;'
             }),
-            'school_url': forms.URLInput(attrs={
-                'placeholder': 'https://...',
-                'style': 'width: 550px;'
-            }),
             'position': forms.NumberInput(attrs={
                 'placeholder': '0',
                 'style': 'width: 80px;'
@@ -71,6 +67,11 @@ class CourseAdminForm(forms.ModelForm):
 
 class FaqInline(admin.TabularInline):
     model = Faq
+    extra = 1
+
+
+class ReviewInline(admin.StackedInline):
+    model = Review
     extra = 1
 
 
@@ -107,12 +108,25 @@ class SectionAdmin(admin.ModelAdmin):
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
     form = CourseAdminForm
+    prepopulated_fields = {'slug': ('title',)}
     list_display = ('title', 'school', 'duration_months', 'duration_days', 'is_active')
     list_filter = ('format', 'is_active')
     search_fields = ('title', 'school')
-    inlines = [CourseSectionInlineForCourse]
+    inlines = [CourseSectionInlineForCourse, ReviewInline]
 
 
-admin.site.register(Review)
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = ('author', 'course', 'short_text')
+    list_filter = ('course',)
+    list_select_related = ('course',)
+    search_fields = ('author', 'text', 'course__title')
+    autocomplete_fields = ('course',)
+
+    @admin.display(description='Текст')
+    def short_text(self, obj):
+        return obj.text[:80]
+
+
 admin.site.register(Faq)
 admin.site.register(CourseSection)

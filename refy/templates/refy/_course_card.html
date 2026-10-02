@@ -10,6 +10,6 @@
   {% if c.rating %}<div class="card-rating"><b>{{ c.rating }}</b> {{ c.reviews_count }} отзывов</div>{% endif %}
   <div class="card-actions">
     {% if c.details_url %}<a href="{{ c.details_url }}" target="_blank" rel="nofollow sponsored noopener" class="btn btn-primary btn-small">Подробнее</a>{% endif %}
-    {% if c.school_url %}<a href="{{ c.school_url }}" target="_blank" rel="nofollow sponsored noopener" class="btn btn-outline btn-small">На сайт школы</a>{% endif %}
+    {% if c.slug %}<a href="{{ c.get_absolute_url }}" class="btn btn-outline btn-small">Отзывы о курсе</a>{% endif %}
   </div>
 </article>

@@ -72,6 +72,18 @@ def category(request, category_slug):
     })
 
 
+def course_detail(request, slug):
+    obj = get_object_or_404(Course, slug=slug, is_active=True)
+    link = (obj.course_sections
+            .filter(section__is_active=True, section__category__is_active=True)
+            .select_related('section__category').first())
+    return render(request, 'refy/course.html', {
+        'course': obj,
+        'parent': link.section if link else None,
+        'reviews': obj.reviews.all(),
+    })
+
+
 def section(request, category_slug, slug):
     obj = get_object_or_404(
         Section.objects.select_related('category'),

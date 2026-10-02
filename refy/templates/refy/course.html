@@ -1,0 +1,37 @@
+{% extends 'refy/base.html' %}
+{% block title %}{{ course.title }} — отзывы, цена, программа{% endblock %}
+{% block description %}{{ course.title }} от {{ course.school }}: цена, длительность, формат обучения и отзывы студентов.{% endblock %}
+{% block content %}
+<section>
+  <div class="container narrow">
+    {% if parent %}<a class="crumb" href="{{ parent.get_absolute_url }}">{{ parent.title }}</a>{% else %}<a class="crumb" href="{% url 'refy:home' %}#sections">Все направления</a>{% endif %}
+    <h1 class="section-title">{{ course.title }}</h1>
+    <p class="section-sub">{{ course.school }}</p>
+    <div class="card">
+      {% if course.tag %}<span class="card-tag">{{ course.tag }}</span>{% endif %}
+      {% if course.audience %}<div class="card-meta"><strong>Для кого:</strong> {{ course.audience }}</div>{% endif %}
+      <div class="card-meta"><strong>Длительность:</strong> {{ course.duration_display }}</div>
+      <div class="card-meta"><strong>Формат:</strong> {{ course.get_format_display|lower }}{% if course.format_note %} + {{ course.format_note }}{% endif %}</div>
+      {% if course.document %}<div class="card-meta"><strong>Документ:</strong> {{ course.document }}</div>{% endif %}
+      <div class="card-price">{{ course.price|default:"Цена по запросу" }}{% if course.installment %} <small>или рассрочка</small>{% endif %}</div>
+      {% if course.rating %}<div class="card-rating"><b>{{ course.rating }}</b> {{ course.reviews_count }} отзывов</div>{% endif %}
+      {% if course.details_url %}<div class="card-actions"><a href="{{ course.details_url }}" target="_blank" rel="nofollow sponsored noopener" class="btn btn-primary">Подробнее о курсе</a></div>{% endif %}
+    </div>
+  </div>
+</section>
+<section id="reviews" class="alt">
+  <div class="container narrow">
+    <h2 class="section-title">Отзывы о курсе</h2>
+    {% if reviews %}
+    <div class="reviews-grid">
+      {% for r in reviews %}
+      <div class="review"><p class="review-text">«{{ r.text }}»</p><div class="review-author">{{ r.author }}</div></div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p>Отзывов пока нет.</p>
+    {% endif %}
+  </div>
+</section>
+{% include 'refy/_cta.html' %}
+{% endblock %}
