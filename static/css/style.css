@@ -136,6 +136,22 @@ nav{order:3;width:100%;margin-left:0;overflow-x:auto;gap:20px;white-space:nowrap
 .card-actions{margin-top:0;padding-top:20px}
 
 @media(max-width:768px){
+
+.hero{padding:24px 0 28px}
+.hero-grid{gap:20px}
+.hero h1{font-size:28px;margin-bottom:10px}
+.hero-sub{font-size:15px;margin-bottom:16px}
+.search{margin-top:0;gap:6px}
+.search input{padding:11px 14px;font-size:16px}
+.search .btn{flex:none;padding:11px 18px;font-size:15px}
+.panel{padding:14px 16px;border-radius:14px}
+.panel h2{font-size:15px;margin-bottom:8px}
+.panel ul{gap:6px}
+.panel li b{font-size:14px}
+.panel li b::before{content:"\2713\00a0";color:var(--teal)}
+.panel li span{display:none}
+.panel .note{margin-top:10px;padding-top:10px;font-size:12px}
+
 section{padding:32px 0}
 .section-title{font-size:24px;margin-bottom:6px}
 .section-sub{font-size:15px;margin-bottom:20px}
