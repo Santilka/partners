@@ -27,22 +27,22 @@ class Section(models.Model):
 class Course(models.Model):
     FORMATS = [('online', 'Онлайн'), ('hybrid', 'Гибрид'), ('offline', 'Очно')]
 
-    tag = models.CharField(max_length=60, blank=True)
-    title = models.CharField(max_length=200)
-    school = models.CharField(max_length=120)
-    audience = models.CharField(max_length=120, blank=True)
-    duration_months = models.PositiveSmallIntegerField()
-    format = models.CharField(max_length=10, choices=FORMATS, default='online')
-    format_note = models.CharField(max_length=80, blank=True)
-    document = models.CharField(max_length=60, blank=True)
-    price = models.CharField(max_length=60, blank=True)
-    installment = models.BooleanField(default=False)
-    rating = models.DecimalField(max_digits=2, decimal_places=1, null=True, blank=True)
-    reviews_count = models.PositiveIntegerField(default=0)
-    details_url = models.URLField(blank=True)
-    school_url = models.URLField(blank=True)
-    position = models.PositiveIntegerField(default=0)
-    is_active = models.BooleanField(default=True)
+    tag = models.CharField('Тег', max_length=60, blank=True)
+    title = models.CharField('Название', max_length=200)
+    school = models.CharField('Школа', max_length=120)
+    audience = models.CharField('Аудитория', max_length=120, blank=True)
+    duration_months = models.PositiveSmallIntegerField('Продолжительность (месяцы)')
+    format = models.CharField('Формат', max_length=10, choices=FORMATS, default='online')
+    format_note = models.CharField("Примечание к формату", max_length=80, blank=True)
+    document = models.CharField('Выдаваемый Документ', max_length=60, blank=True)
+    price = models.CharField('Цена', max_length=60, blank=True)
+    installment = models.BooleanField('Рассрочка', default=False)
+    rating = models.DecimalField('Рейтинг', max_digits=2, decimal_places=1, null=True, blank=True)
+    reviews_count = models.PositiveIntegerField('Количество отзывов', default=0)
+    details_url = models.URLField('Ссылка на детали', blank=True)
+    school_url = models.URLField('Ссылка на школу', blank=True)
+    position = models.PositiveIntegerField('Порядок', default=0)
+    is_active = models.BooleanField('Активен', default=True)
 
     class Meta:
         ordering = ['position', 'title']
@@ -66,10 +66,12 @@ class Course(models.Model):
 
 
 class Review(models.Model):
-    course = models.ForeignKey(Course, related_name='reviews', on_delete=models.CASCADE)
-    author = models.CharField(max_length=120)
-    text = models.TextField()
-    
+    course = models.ForeignKey(Course, related_name='reviews',
+                                on_delete=models.CASCADE, 
+                                verbose_name='Курс')
+    author = models.CharField('Автор', max_length=120)
+    text = models.TextField('Текст отзыва')
+
     class Meta:
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
@@ -78,8 +80,8 @@ class Review(models.Model):
         return self.author
 
 class CourseSection(models.Model):
-    course = models.ForeignKey(Course, related_name='course_sections', on_delete=models.CASCADE)
-    section = models.ForeignKey(Section, related_name='course_sections', on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, related_name='course_sections', on_delete=models.CASCADE, verbose_name='Курс')
+    section = models.ForeignKey(Section, related_name='course_sections', on_delete=models.CASCADE, verbose_name='Раздел')
     position = models.PositiveIntegerField('Порядок', default=0)
 
     class Meta:
@@ -92,10 +94,12 @@ class CourseSection(models.Model):
         return f'{self.course.title} → {self.section.title}'
 
 class Faq(models.Model):
-    section = models.ForeignKey(Section, related_name='faqs', on_delete=models.CASCADE)
-    question = models.CharField(max_length=250)
-    answer = models.TextField()
-    position = models.PositiveIntegerField(default=0)
+    section = models.ForeignKey(Section, related_name='faqs', 
+                                on_delete=models.CASCADE, 
+                                verbose_name='Раздел')
+    question = models.CharField('Вопрос', max_length=250)
+    answer = models.TextField('Ответ')
+    position = models.PositiveIntegerField('Порядок', default=0)
 
     class Meta:
         ordering = ['position']
