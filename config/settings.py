@@ -133,6 +133,8 @@ STATICFILES_DIRS = [
 ]
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'  # для collectstatic, на dev не обязателен
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'refy' / 'media'
 
 
 # Email
