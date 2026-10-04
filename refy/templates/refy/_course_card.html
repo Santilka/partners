@@ -1,18 +1,23 @@
-{% load refy_extras %}<article class="card"{% if c.is_online %} data-online="1"{% endif %}{% if c.has_diploma %} data-diploma="1"{% endif %}{% if c.is_short %} data-short="1"{% endif %}>
-  {% if c.tag %}<span class="card-tag">{{ c.tag }}</span>{% endif %}
-  <h3>{{ c.title }}</h3>
-  <div class="card-meta"><strong>Школа:</strong> {{ c.school }}</div>
-  {% if c.audience %}<div class="card-meta"><strong>Для кого:</strong> {{ c.audience }}</div>{% endif %}
-  <div class="card-meta"><strong>Длительность:</strong> {{ c.duration_display }}</div>
-  <div class="card-meta"><strong>Формат:</strong> {{ c.get_format_display|lower }}{% if c.format_note %} + {{ c.format_note }}{% endif %}</div>
-  {% if c.document %}<div class="card-meta"><strong>Документ:</strong> {{ c.document }}</div>{% endif %}
-  <div class="card-price">{{ c.price|default:"Цена по запросу" }}{% if c.installment %} <small>или рассрочка</small>{% endif %}</div>
-  {% if c.rating %}<div class="card-rating"><b>{{ c.rating }}</b>{% with total=c.reviews_n|add:c.school_reviews_n %}{% if total %} · {{ total }} {{ total|ru_plural:"отзыв,отзыва,отзывов" }}{% endif %}{% endwith %}</div>{% endif %}
-  <div class="card-actions">
-    {% if c.details_url %}<a href="{{ c.details_url }}" target="_blank" rel="nofollow sponsored noopener" class="btn btn-primary btn-small">Подробнее</a>{% endif %}
-    {% if c.reviews_n or c.school_slug %}<div class="card-reviews">
-      {% if c.reviews_n %}<a href="{{ c.get_absolute_url }}#reviews" class="btn btn-outline btn-small">Отзывы курса · {{ c.reviews_n }}</a>{% endif %}
-      {% if c.school_slug %}<a href="{% url 'refy:school' c.school_slug %}#reviews" class="btn btn-outline btn-small">Отзывы школы · {{ c.school_reviews_n }}</a>{% endif %}
-    </div>{% endif %}
+{% load refy_extras %}<article class="card card-course"{% if c.is_online %} data-online="1"{% endif %}{% if c.has_diploma %} data-diploma="1"{% endif %}{% if c.is_short %} data-short="1"{% endif %}>
+  <div class="card-media">
+    {% if c.image %}<img src="{{ c.image.url }}" alt="{{ c.title }}" loading="lazy">{% endif %}
+    {% if c.tag %}<span class="card-tag">{{ c.tag }}</span>{% endif %}
+  </div>
+  <div class="card-body">
+    <h3>{{ c.title }}</h3>
+    <div class="card-meta"><strong>Школа:</strong> {{ c.school }}</div>
+    {% if c.audience %}<div class="card-meta"><strong>Для кого:</strong> {{ c.audience }}</div>{% endif %}
+    <div class="card-meta"><strong>Длительность:</strong> {{ c.duration_display }}</div>
+    <div class="card-meta"><strong>Формат:</strong> {{ c.get_format_display|lower }}{% if c.format_note %} + {{ c.format_note }}{% endif %}</div>
+    {% if c.document %}<div class="card-meta"><strong>Документ:</strong> {{ c.document }}</div>{% endif %}
+    <div class="card-price">{{ c.price|default:"Цена по запросу" }}{% if c.installment %} <small>или рассрочка</small>{% endif %}</div>
+    {% if c.rating %}<div class="card-rating"><b>{{ c.rating }}</b>{% with total=c.reviews_n|add:c.school_reviews_n %}{% if total %} · {{ total }} {{ total|ru_plural:"отзыв,отзыва,отзывов" }}{% endif %}{% endwith %}</div>{% endif %}
+    <div class="card-actions">
+      {% if c.details_url %}<a href="{{ c.details_url }}" target="_blank" rel="nofollow sponsored noopener" class="btn btn-primary btn-small">Подробнее</a>{% endif %}
+      {% if c.reviews_n or c.school_slug %}<div class="card-reviews">
+        {% if c.reviews_n %}<a href="{{ c.get_absolute_url }}#reviews" class="btn btn-outline btn-small">Отзывы курса · {{ c.reviews_n }}</a>{% endif %}
+        {% if c.school_slug %}<a href="{% url 'refy:school' c.school_slug %}#reviews" class="btn btn-outline btn-small">Отзывы школы · {{ c.school_reviews_n }}</a>{% endif %}
+      </div>{% endif %}
+    </div>
   </div>
 </article>
