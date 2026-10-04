@@ -27,13 +27,14 @@
 <section id="compare">
   <div class="container">
     <h2 class="section-title">Сравнение курсов</h2>
+    <p class="compare-hint">Нажмите на строку, чтобы открыть страницу курса</p>
     <div class="compare-outer">
       <div class="compare-wrap">
         <table class="compare-table">
-          <thead><tr><th>Курс</th><th>Школа</th><th>Длительность</th><th>Формат</th><th>Цена</th><th></th></tr></thead>
+          <thead><tr><th>Курс</th><th>Школа</th><th>Срок</th><th>Формат</th><th>Цена</th></tr></thead>
           <tbody>
             {% for c in courses %}
-            <tr><td>{{ c.title }}</td><td>{{ c.school }}</td><td>{{ c.duration_display }}</td><td>{{ c.get_format_display }}</td><td>{{ c.price|default:"—" }}</td><td>{% if c.details_url %}<a href="{{ c.details_url }}" target="_blank" rel="nofollow sponsored noopener">Подробнее</a>{% endif %}</td></tr>
+            <tr{% if c.details_url %} data-href="{{ c.details_url }}"{% endif %}><td>{% if c.details_url %}<a href="{{ c.details_url }}" target="_blank" rel="nofollow sponsored noopener">{{ c.title }}</a>{% else %}{{ c.title }}{% endif %}</td><td>{{ c.school }}</td><td>{{ c.duration_display }}</td><td>{{ c.get_format_display }}</td><td>{{ c.price|default:"—" }}</td></tr>
             {% endfor %}
           </tbody>
         </table>
@@ -73,5 +74,5 @@
 {% endblock %}
 {% block scripts %}{% load static %}
 <script src="{% static 'js/filters.js' %}"></script>
-<script src="{% static 'js/compare-scroll.js' %}"></script>
+<script src="{% static 'js/compare-rows.js' %}"></script>
 {% endblock %}
