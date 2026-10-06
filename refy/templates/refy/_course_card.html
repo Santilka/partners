@@ -4,7 +4,7 @@
     {% if c.tag %}<span class="card-tag">{{ c.tag }}</span>{% endif %}
   </div>
   <div class="card-body">
-    <h3>{{ c.title }}</h3>
+    <h3><a href="{{ c.get_absolute_url }}" style="color:inherit;text-decoration:none">{{ c.title }}</a></h3>
     <div class="card-school">{{ c.school }}</div>
     <div class="card-info">
     <div class="card-chips">
@@ -19,7 +19,7 @@
     <div class="card-price">{{ c.price|default:"Цена по запросу" }}{% if c.installment %} <small>или рассрочка</small>{% endif %}</div>
     <div class="card-rating{% if not c.rating %} card-rating-empty{% endif %}">{% if c.rating %}<b>{{ c.rating }}</b>{% with total=c.reviews_n|add:c.school_reviews_n %}{% if total %} · {{ total }} {{ total|ru_plural:"отзыв,отзыва,отзывов" }}{% endif %}{% endwith %}{% endif %}</div>
     <div class="card-actions">
-      {% if c.details_url %}<a href="{{ c.details_url }}" target="_blank" rel="nofollow sponsored noopener" class="btn btn-primary btn-small">Подробнее</a>{% endif %}
+      {% if c.details_url %}<a href="{% url 'refy:go' c.pk %}" target="_blank" rel="nofollow sponsored noopener" class="btn btn-primary btn-small">Подробнее</a>{% endif %}
       {% if c.reviews_n or c.school_slug %}<div class="card-reviews">
         {% if c.reviews_n %}<a href="{{ c.get_absolute_url }}#reviews" class="btn btn-outline btn-small">Отзывы курса · {{ c.reviews_n }}</a>{% endif %}
         {% if c.school_slug %}<a href="{% url 'refy:school' c.school_slug %}#reviews" class="btn btn-outline btn-small">Отзывы школы · {{ c.school_reviews_n }}</a>{% endif %}

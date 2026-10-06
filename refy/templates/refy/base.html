@@ -3,10 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{% block title %}Каталог курсов{% endblock %}</title>
-<meta name="description" content="{% block description %}{% endblock %}">
-<link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<title>{% block title %}{{ seo.title|default:"Каталог курсов" }}{% endblock %}</title>
+<meta name="description" content="{% block description %}{{ seo.description }}{% endblock %}">
+<link rel="canonical" href="https://{{ request.get_host }}{{ request.path }}">
+{% if seo %}<meta property="og:type" content="website">
+<meta property="og:site_name" content="Каталог курсов">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:title" content="{{ seo.title }}">
+<meta property="og:description" content="{{ seo.description }}">
+<meta property="og:url" content="https://{{ request.get_host }}{{ request.path }}">
+{% if seo.image %}<meta property="og:image" content="{{ seo.image }}">
+{% endif %}<meta name="twitter:card" content="{% if seo.image %}summary_large_image{% else %}summary{% endif %}">
+{% if seo.jsonld %}<script type="application/ld+json">{{ seo.jsonld }}</script>
+{% endif %}{% endif %}<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/style.css' %}">
@@ -53,6 +62,7 @@
     </div>
   </div>
 </footer>
+<script>['pointerdown','keydown','touchstart'].forEach(function(e){addEventListener(e,function(){document.cookie='hv=1;path=/;max-age=86400;SameSite=Lax'},{once:true,capture:true})})</script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

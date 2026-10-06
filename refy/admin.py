@@ -1,7 +1,8 @@
 from django.contrib import admin
+from django.db.models import Count, Q
 from django import forms
 
-from .models import Category, Course, CourseSection, Faq, Review, School, SchoolReview, Section
+from .models import Category, ClickEvent, Course, CourseSection, Faq, Review, School, SchoolReview, Section
 
 
 class CourseAdminForm(forms.ModelForm):
@@ -116,10 +117,18 @@ class SectionAdmin(admin.ModelAdmin):
 class CourseAdmin(admin.ModelAdmin):
     form = CourseAdminForm
     prepopulated_fields = {'slug': ('title',)}
-    list_display = ('title', 'school', 'duration_months', 'duration_days', 'is_active')
+    list_display = ('title', 'school', 'duration_months', 'duration_days', 'is_active', 'clicks_total')
     list_filter = ('format', 'is_active')
     search_fields = ('title', 'school')
     inlines = [CourseSectionInlineForCourse, ReviewInline]
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(
+            clicks_n=Count('clicks', filter=Q(clicks__is_bot=False)))
+
+    @admin.display(description='Клики', ordering='clicks_n')
+    def clicks_total(self, obj):
+        return obj.clicks_n
 
 
 @admin.register(Review)
@@ -158,3 +167,18 @@ class SchoolReviewAdmin(admin.ModelAdmin):
 
 admin.site.register(Faq)
 admin.site.register(CourseSection)
+
+
+@admin.register(ClickEvent)
+class ClickEventAdmin(admin.ModelAdmin):
+    list_display = ('created_at', 'course', 'is_bot', 'source')
+    list_filter = ('is_bot', 'created_at')
+    date_hierarchy = 'created_at'
+    list_select_related = ('course',)
+    search_fields = ('course__title', 'source')
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False

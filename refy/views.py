@@ -1,13 +1,21 @@
+import logging
+from urllib.parse import urlsplit
+
 from django.db.models import Case, Count, IntegerField, OuterRef, Q, Subquery, When
 from django.db.models.functions import Coalesce
-from django.http import Http404
+from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 
-from .models import Category, Course, CourseSection, Review, School, SchoolReview, Section
+from . import seo
+from .models import Category, ClickEvent, Course, CourseSection, Review, School, SchoolReview, Section
 
 HOME_TILES = 8
 FEATURED = 6
 SEARCH_LIMIT = 60
+BOT_MARKERS = ('bot', 'crawl', 'spider', 'slurp', 'preview', 'headless')
+
+log = logging.getLogger(__name__)
 
 
 def with_review_flags(qs):
@@ -46,6 +54,11 @@ def home(request):
     return render(request, 'refy/home.html', {
         'groups': list(groups.values()),
         'featured': random_courses(),
+        'seo': seo.page(
+            request,
+            'Каталог курсов: цены, отзывы, сравнение',
+            'Честный каталог курсов по разным направлениям: цены, отзывы студентов и практика в одном месте.',
+        ),
     })
 
 
@@ -83,6 +96,12 @@ def category(request, category_slug):
     return render(request, 'refy/category.html', {
         'category': obj,
         'sections': obj.sections.filter(is_active=True),
+        'seo': seo.page(
+            request,
+            f'{obj.seo_title or obj.title} — каталог курсов',
+            obj.seo_description or obj.summary or f'{obj.title}: направления, курсы, цены и отзывы студентов.',
+            seo.crumbs(request, (obj.title, obj.get_absolute_url())),
+        ),
     })
 
 
@@ -92,12 +111,28 @@ def course_detail(request, slug):
             .filter(section__is_active=True, section__category__is_active=True)
             .select_related('section__category').first())
     school_obj = School.objects.filter(title=obj.school).first()
+    chain = []
+    if link:
+        s = link.section
+        chain = [(s.category.title, s.category.get_absolute_url()), (s.title, s.get_absolute_url())]
+    chain.append((obj.title, obj.get_absolute_url()))
+    facts = ', '.join(x for x in (obj.duration_display, obj.get_format_display().lower(), obj.price) if x)
+    desc = (f'{obj.title} от {obj.school}' + (f': {facts}' if facts else '')
+            + '. Отзывы студентов и условия обучения.')
     return render(request, 'refy/course.html', {
         'course': obj,
         'parent': link.section if link else None,
         'reviews': obj.reviews.all(),
         'school_obj': school_obj,
         'school_reviews_n': school_obj.reviews.count() if school_obj else 0,
+        'seo': seo.page(
+            request,
+            f'{obj.title} — {obj.school}: цена и отзывы',
+            desc,
+            seo.crumbs(request, *chain),
+            seo.course(request, obj, desc, school_obj),
+            image=obj.image,
+        ),
     })
 
 
@@ -108,6 +143,13 @@ def school_detail(request, slug):
         'school': obj,
         'courses': courses,
         'reviews': obj.reviews.all(),
+        'seo': seo.page(
+            request,
+            f'{obj.title} — курсы и отзывы',
+            f'Курсы школы {obj.title}: цены, длительность, формат обучения и отзывы студентов.',
+            seo.crumbs(request, (obj.title, obj.get_absolute_url())),
+            seo.school(request, obj),
+        ),
     })
 
 
@@ -121,9 +163,57 @@ def section(request, category_slug, slug):
         course_sections__section=obj,
         is_active=True,
     ).distinct()
+    courses = list(with_review_flags(base))
+    faqs = list(obj.faqs.all())
+    nodes = [seo.crumbs(request, (obj.category.title, obj.category.get_absolute_url()),
+                        (obj.title, obj.get_absolute_url()))]
+    if courses:
+        nodes.append(seo.item_list(request, courses))
+    if faqs:
+        nodes.append(seo.faq(faqs))
     return render(request, 'refy/section.html', {
         'section': obj,
-        'courses': with_review_flags(base),
+        'courses': courses,
         'reviews': Review.objects.filter(course__in=base)[:3],
-        'faqs': obj.faqs.all(),
+        'faqs': faqs,
+        'seo': seo.page(
+            request,
+            f'{obj.seo_title or obj.title} — каталог курсов',
+            obj.seo_description or obj.summary or f'{obj.title}: сравнение курсов, цены и отзывы студентов.',
+            *nodes,
+        ),
     })
+
+
+def go(request, pk):
+    obj = get_object_or_404(Course, pk=pk, is_active=True)
+    if not obj.details_url:
+        raise Http404
+    if request.method == 'GET':
+        ua = request.META.get('HTTP_USER_AGENT', '')
+        ref = request.META.get('HTTP_REFERER', '')
+        human = (
+            bool(ua)
+            and not any(b in ua.lower() for b in BOT_MARKERS)
+            and request.COOKIES.get('hv') == '1'
+            and urlsplit(ref).netloc == request.get_host()
+        )
+        try:
+            ClickEvent.objects.create(
+                course=obj,
+                url=obj.details_url,
+                source=ref[:300],
+                user_agent=ua[:255],
+                is_bot=not human,
+            )
+        except Exception:
+            log.exception('click log failed')
+    return HttpResponseRedirect(obj.details_url)
+
+
+def robots(request):
+    lines = [
+        'User-agent: *', 'Disallow: /go/', 'Disallow: /search/',
+        f"Sitemap: https://{request.get_host()}{reverse('refy:sitemap')}",
+    ]
+    return HttpResponse('\n'.join(lines) + '\n', content_type='text/plain')

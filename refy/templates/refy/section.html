@@ -1,6 +1,4 @@
 {% extends 'refy/base.html' %}
-{% block title %}{{ section.seo_title|default:section.title }} — каталог курсов{% endblock %}
-{% block description %}{{ section.seo_description|default:section.summary }}{% endblock %}
 {% block nav_extra %}<a href="#compare">Сравнение</a><a href="#faq">Вопросы</a>{% endblock %}
 {% block content %}
 <section id="catalog">
@@ -34,7 +32,7 @@
           <thead><tr><th>Курс</th><th>Школа</th><th>Срок</th><th>Формат</th><th>Цена</th></tr></thead>
           <tbody>
             {% for c in courses %}
-            <tr{% if c.details_url %} data-href="{{ c.details_url }}"{% endif %}><td>{% if c.details_url %}<a href="{{ c.details_url }}" target="_blank" rel="nofollow sponsored noopener">{{ c.title }}</a>{% else %}{{ c.title }}{% endif %}</td><td>{{ c.school }}</td><td>{{ c.duration_display }}</td><td>{{ c.get_format_display }}</td><td>{{ c.price|default:"—" }}</td></tr>
+            <tr{% if c.details_url %} data-href="{% url 'refy:go' c.pk %}"{% endif %}><td>{% if c.details_url %}<a href="{% url 'refy:go' c.pk %}" target="_blank" rel="nofollow sponsored noopener">{{ c.title }}</a>{% else %}{{ c.title }}{% endif %}</td><td>{{ c.school }}</td><td>{{ c.duration_display }}</td><td>{{ c.get_format_display }}</td><td>{{ c.price|default:"—" }}</td></tr>
             {% endfor %}
           </tbody>
         </table>

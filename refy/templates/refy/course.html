@@ -1,7 +1,5 @@
 {% extends 'refy/base.html' %}
 {% load refy_extras %}
-{% block title %}{{ course.title }} — отзывы, цена, программа{% endblock %}
-{% block description %}{{ course.title }} от {{ course.school }}: цена, длительность, формат обучения и отзывы студентов.{% endblock %}
 {% block content %}
 <section>
   <div class="container narrow">
@@ -17,7 +15,7 @@
       <div class="card-price">{{ course.price|default:"Цена по запросу" }}{% if course.installment %} <small>или рассрочка</small>{% endif %}</div>
       {% if course.rating %}<div class="card-rating"><b>{{ course.rating }}</b>{% with total=reviews|length|add:school_reviews_n %}{% if total %} · {{ total }} {{ total|ru_plural:"отзыв,отзыва,отзывов" }}{% endif %}{% endwith %}</div>{% endif %}
       {% if course.details_url or school_reviews_n %}<div class="card-actions">
-        {% if course.details_url %}<a href="{{ course.details_url }}" target="_blank" rel="nofollow sponsored noopener" class="btn btn-primary">Подробнее о курсе</a>{% endif %}
+        {% if course.details_url %}<a href="{% url 'refy:go' course.pk %}" target="_blank" rel="nofollow sponsored noopener" class="btn btn-primary">Подробнее о курсе</a>{% endif %}
         {% if school_reviews_n %}<a href="{{ school_obj.get_absolute_url }}#reviews" class="btn btn-outline">Отзывы школы · {{ school_reviews_n }}</a>{% endif %}
       </div>{% endif %}
     </div>

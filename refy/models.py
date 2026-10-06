@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
 
-RESERVED_SLUGS = {'search', 'kursy', 'shkoly'}
+RESERVED_SLUGS = {'search', 'kursy', 'shkoly', 'go'}
 
 
 class Category(models.Model):
@@ -213,3 +213,22 @@ class Faq(models.Model):
 
     def __str__(self):
         return self.question
+
+
+class ClickEvent(models.Model):
+    course = models.ForeignKey(Course, related_name='clicks', null=True, blank=True,
+                               on_delete=models.SET_NULL, verbose_name='Курс')
+    url = models.URLField('Ссылка', max_length=500)
+    source = models.CharField('Страница', max_length=300, blank=True)
+    user_agent = models.CharField(max_length=255, blank=True)
+    is_bot = models.BooleanField('Бот', default=False)
+    created_at = models.DateTimeField('Время', auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [models.Index(fields=['course', 'created_at'])]
+        verbose_name = 'Клик'
+        verbose_name_plural = 'Клики'
+
+    def __str__(self):
+        return f'{self.course_id} · {self.created_at:%Y-%m-%d %H:%M}'

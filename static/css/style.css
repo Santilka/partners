@@ -345,21 +345,29 @@ footer a:hover{color:#fff}
 /* ==========================================================================
    COMPONENT: PTILES (section tiles)
    ========================================================================== */
-.ptiles{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
-  gap:var(--gap-sm);
-}
+.ptiles{display:flex;flex-wrap:wrap;gap:8px}
 .ptile{
-  display:flex;align-items:center;gap:16px;
-  min-height:96px;padding:16px 20px;
-  background:#f7f7f7;border-radius:12px;
-  color:var(--ink);font-weight:700;font-size:17px;line-height:1.25;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:6px 14px 6px 8px;
+  background:#fff;border:1px solid var(--line);border-radius:var(--radius-pill);
+  color:var(--ink);font-weight:600;font-size:14px;line-height:1.2;
   text-decoration:none;
-  transition:background .2s;
+  transition:transform .2s,box-shadow .2s,border-color .2s,background .2s;
 }
-.ptile:hover{background:var(--tint)}
-.ptile img{width:56px;height:56px;flex:none;object-fit:contain}
+.ptile img{width:28px;height:28px;flex:none;object-fit:contain;transition:transform .25s}
+.ptile:focus-visible{border-color:var(--teal);background:var(--tint)}
+@media(hover:hover){
+  .ptile:hover{
+    transform:translateY(-2px);
+    border-color:var(--teal);
+    box-shadow:0 6px 16px rgba(20,35,43,.10);
+  }
+  .ptile:hover img{transform:scale(1.15) rotate(-6deg)}
+}
+@media(prefers-reduced-motion:reduce){
+  .ptile,.ptile img{transition:none}
+  .ptile:hover,.ptile:hover img{transform:none}
+}
 
 /* ==========================================================================
    COMPONENT: REVIEWS
@@ -464,15 +472,17 @@ footer a:hover{color:#fff}
 /* ==========================================================================
    PAGE: CAT-BLOCK (home.html)
    ========================================================================== */
-.cat-block+.cat-block{margin-top:56px}
+#sections{padding:40px 0}
+.cat-block+.cat-block{margin-top:28px}
+.cat-block .section-title{font-size:clamp(20px,2.4vw,26px);margin-bottom:4px}
 .cat-block .section-title a{color:inherit;text-decoration:none}
 .cat-block .section-title a:hover{color:var(--teal)}
-.more-link{
-  display:block;margin-top:24px;
-  text-align:center;
+.cat-block .section-sub{font-size:15px;margin-bottom:14px;max-width:70ch}
+.cat-block .more-link{
+  display:inline-block;margin-top:12px;font-size:14px;
   color:var(--teal);font-weight:500;text-decoration:none;
 }
-.more-link:hover{text-decoration:underline}
+.cat-block .more-link:hover{text-decoration:underline}
 
 /* ==========================================================================
    PAGE: COMPARE-TABLE (section.html)
@@ -615,8 +625,8 @@ footer a:hover{color:#fff}
   .compare-outer::after{display:none}
     
   /* --- плитки разделов --- */
-  .ptile{min-height:60px;padding:10px 14px;gap:12px;font-size:15px}
-  .ptile img{width:40px;height:40px}
+  .ptile{font-size:13px;padding:5px 12px 5px 6px}
+  .ptile img{width:24px;height:24px}
 
   /* --- отзывы --- */
   .review{padding:18px}
@@ -626,7 +636,8 @@ footer a:hover{color:#fff}
   .faq-question{font-size:16px;padding:14px 0}
 
   /* --- категории / CTA / футер --- */
-  .cat-block+.cat-block{margin-top:32px}
+  .cat-block+.cat-block{margin-top:20px}
+  #sections{padding:24px 0}
   .cta{padding:28px 22px}
   .cta .btn{width:100%}
   .footer-grid{grid-template-columns:1fr 1fr}
