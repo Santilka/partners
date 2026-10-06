@@ -1,8 +1,7 @@
 from django.contrib import admin
 from django.db.models import Count, Q
 from django import forms
-
-from .models import Category, ClickEvent, Course, CourseSection, Faq, Review, School, SchoolReview, Section
+from .models import Category, ClickEvent, Course, CourseSection, Faq, Review, School, SchoolReview, Section, HeroSlide
 
 
 class CourseAdminForm(forms.ModelForm):
@@ -182,3 +181,9 @@ class ClickEventAdmin(admin.ModelAdmin):
 
     def has_change_permission(self, request, obj=None):
         return False
+
+@admin.register(HeroSlide)
+class HeroSlideAdmin(admin.ModelAdmin):
+    list_display = ('title', 'position', 'is_active')
+    list_editable = ('position', 'is_active')
+    ordering = ('position', 'id')

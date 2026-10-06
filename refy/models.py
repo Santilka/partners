@@ -214,6 +214,32 @@ class Faq(models.Model):
     def __str__(self):
         return self.question
 
+class HeroSlide(models.Model):
+    title = models.CharField('Название (для админки)', max_length=120, blank=True)
+    html = models.TextField(
+        'HTML + CSS',
+        blank=True,
+        help_text='HTML и CSS работают. &lt;script&gt; из админки не сработает — JS только в slider.js.',
+    )
+    image = models.FileField(
+        'Картинка',
+        upload_to='refy/slider/',
+        blank=True,
+        help_text='Рекомендуется 1920×720. На мобильных обрезается по центру.',
+    )
+    alt = models.CharField('Alt картинки', max_length=160, blank=True)
+    link_url = models.URLField('Ссылка (кнопка)', blank=True)
+    link_text = models.CharField('Текст кнопки', max_length=60, blank=True)
+    position = models.PositiveIntegerField('Порядок', default=0)
+    is_active = models.BooleanField('Показывать', default=True)
+
+    class Meta:
+        ordering = ['position', 'id']
+        verbose_name = 'Слайд (hero)'
+        verbose_name_plural = 'Слайды (hero)'
+
+    def __str__(self):
+        return self.title or f'Слайд {self.pk}'
 
 class ClickEvent(models.Model):
     course = models.ForeignKey(Course, related_name='clicks', null=True, blank=True,

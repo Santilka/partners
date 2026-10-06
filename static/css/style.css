@@ -515,31 +515,154 @@ footer a:hover{color:#fff}
 .compare-hint{margin:-8px 0 14px;font-size:clamp(10px,3.1vw,14px);color:var(--muted);text-align:center;white-space:nowrap}
 
 /* ==========================================================================
+   COMPONENT: HERO SLIDER
+   ========================================================================== */
+.hero-slider{
+  position:relative;
+  overflow:hidden;
+  background:var(--deep);
+  color:#fff;
+}
+.hero-slider-track{
+  display:flex;
+  transition:transform .6s ease;
+  will-change:transform;
+}
+.hero-slide{
+  position:relative;
+  flex:0 0 100%;
+  min-height:520px;
+  display:flex;
+  align-items:center;
+  background:linear-gradient(135deg,var(--teal),var(--deep));
+  overflow:hidden;
+}
+.hero-slide-bg{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  z-index:0;
+}
+.hero-slide-overlay{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  background:linear-gradient(90deg,rgba(12,47,48,.78),rgba(12,47,48,.35));
+  pointer-events:none;
+}
+.hero-slide:not(.has-image) .hero-slide-overlay{
+  background:transparent;
+}
+.hero-slide-inner{
+  position:relative;
+  z-index:2;
+  width:100%;
+  padding:80px 0;
+  max-width:760px;
+}
+.hero-slide-content h1{
+  font-size:clamp(32px,4.5vw,56px);
+  font-weight:800;
+  line-height:1.08;
+  letter-spacing:-.03em;
+  margin-bottom:16px;
+  text-wrap:balance;
+}
+.hero-slide-content h2{
+  font-size:clamp(26px,3.4vw,40px);
+  font-weight:800;
+  line-height:1.15;
+  letter-spacing:-.025em;
+  margin-bottom:14px;
+}
+.hero-slide-content p{
+  font-size:18px;
+  color:#d5e6e3;
+  max-width:560px;
+  margin-bottom:24px;
+}
+.hero-slide-content a{color:#fff;text-decoration:underline;text-underline-offset:3px}
+.hero-slide-btn{margin-top:4px}
+
+.hero-slider-btn{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:3;
+  display:flex;align-items:center;justify-content:center;
+  width:48px;height:48px;padding:0;border:none;border-radius:50%;
+  background:rgba(255,255,255,.92);color:var(--teal);cursor:pointer;
+  box-shadow:0 6px 20px rgba(20,35,43,.25);
+  transition:background .2s,color .2s,transform .2s;
+}
+.hero-slider-btn:hover{background:#fff;color:var(--teal-d);transform:translateY(-50%) scale(1.06)}
+.hero-slider-btn:focus-visible{outline:3px solid var(--amber);outline-offset:3px}
+.hero-slider-btn svg{display:block}
+.hero-slider-prev{left:16px}
+.hero-slider-next{right:16px}
+
+.hero-slider-dots{
+  position:absolute;
+  left:0;right:0;bottom:20px;
+  z-index:3;
+  display:flex;justify-content:center;gap:10px;
+}
+.hero-slider-dot{
+  width:10px;height:10px;padding:0;border:none;border-radius:50%;
+  background:rgba(255,255,255,.45);
+  cursor:pointer;
+  transition:background .2s,transform .2s;
+}
+.hero-slider-dot:hover{background:rgba(255,255,255,.75)}
+.hero-slider-dot.is-active{background:#fff;transform:scale(1.2)}
+.hero-slider-dot:focus-visible{outline:2px solid var(--amber);outline-offset:3px}
+
+.visually-hidden{
+  position:absolute!important;
+  width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
+}
+
+@media(max-width:768px){
+
+}
+
+/* ==========================================================================
    RESPONSIVE (max-width: 768px)
    ========================================================================== */
 @media(max-width:768px){
 
-    /* --- секции / hero --- */
-    section{padding:32px 0}
-    .hero{padding:24px 0 28px}
-    .hero-grid{
-    grid-template-columns:1fr;
-    gap:20px;
-    align-items:stretch;
-    }
-    .hero-grid > *{min-width:0}
-    
-    /* центрируем только текст, .search и .panel остаются на всю ширину */
-    .hero h1,
-    .hero-sub{
-    text-align:center;
-    margin-inline:auto;
-    }
-    .hero h1{font-size:28px;margin-bottom:10px}
-    .hero-sub{font-size:15px;margin-bottom:16px;max-width:100%}
-    
-    .hero .search{margin-top:0;margin-inline:auto}
+  /* --- секции / hero --- */
+  section{padding:32px 0}
+  .hero{padding:24px 0 28px}
+  .hero-grid{
+  grid-template-columns:1fr;
+  gap:20px;
+  align-items:stretch;
+  }
+  .hero-grid > *{min-width:0}
+  
+  /* центрируем только текст, .search и .panel остаются на всю ширину */
+  .hero h1,
+  .hero-sub{
+  text-align:center;
+  margin-inline:auto;
+  }
+  .hero h1{font-size:28px;margin-bottom:10px}
+  .hero-sub{font-size:15px;margin-bottom:16px;max-width:100%}
+  .hero .search{margin-top:0;margin-inline:auto}
 
+  /* --- HERO SLIDER --- */
+  .hero-slide{min-height:420px}
+  .hero-slide-inner{padding:56px 0 72px;max-width:100%}
+  .hero-slide-content h1{font-size:26px;margin-bottom:10px}
+  .hero-slide-content h2{font-size:22px}
+  .hero-slide-content p{font-size:15px;margin-bottom:18px}
+  .hero-slider-btn{display:none}
+  .hero-slider-dots{bottom:14px;gap:8px}
+  .hero-slider-dot{width:8px;height:8px}
   /* --- шапка --- */
   .header-inner{flex-wrap:wrap;gap:8px 12px}
   .hd-cta{margin-left:auto}
@@ -642,6 +765,8 @@ footer a:hover{color:#fff}
   .cta .btn{width:100%}
   .footer-grid{grid-template-columns:1fr 1fr}
 }
+
+
 
     /* Hover только для устройств с курсором */
 @media(hover:hover){

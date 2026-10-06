@@ -1,12 +1,14 @@
 {% extends 'refy/base.html' %}
 {% load static %}
 {% block content %}
+{% if hero_slides %}
+  {% include 'refy/_hero_slider.html' %}
+{% else %}
 <section class="hero">
   <div class="container hero-grid">
     <div>
       <h1>Найди свой курс</h1>
       <p class="hero-sub">Честный каталог: цены, отзывы и практика в одном месте. Введите профессию или тему и сравните программы.</p>
-      {% include 'refy/_search_form.html' %}
     </div>
     <aside class="panel">
       <h2>Как мы выбираем курсы</h2>
@@ -19,6 +21,7 @@
     </aside>
   </div>
 </section>
+{% endif %}
 {% if featured %}
 <section id="featured" class="alt">
   <div class="container">
@@ -34,6 +37,12 @@
   </div>
 </section>
 {% endif %}
+<section class="alt">
+  <div class="container">
+    <h2 class="section-title">Поиск по каталогу</h2>
+    {% include 'refy/_search_form.html' %}
+  </div>
+</section>
 <section id="sections">
   <div class="container">
     {% for g in groups %}
@@ -51,4 +60,7 @@
   </div>
 </section>
 {% endblock %}
-{% block scripts %}<script src="{% static 'js/carousel.js' %}"></script>{% endblock %}
+{% block scripts %}
+<script src="{% static 'js/carousel.js' %}"></script>
+<script src="{% static 'js/slider.js' %}"></script>
+{% endblock %}

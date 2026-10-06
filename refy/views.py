@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
 from . import seo
-from .models import Category, ClickEvent, Course, CourseSection, Review, School, SchoolReview, Section
+from .models import Category, ClickEvent, Course, CourseSection, Review, School, SchoolReview, Section, HeroSlide
 
 HOME_TILES = 8
 FEATURED = 6
@@ -54,6 +54,7 @@ def home(request):
     return render(request, 'refy/home.html', {
         'groups': list(groups.values()),
         'featured': random_courses(),
+        'hero_slides': HeroSlide.objects.filter(is_active=True),
         'seo': seo.page(
             request,
             'Каталог курсов: цены, отзывы, сравнение',
