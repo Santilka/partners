@@ -5,13 +5,19 @@
   </div>
   <div class="card-body">
     <h3>{{ c.title }}</h3>
-    <div class="card-meta"><strong>Школа:</strong> {{ c.school }}</div>
-    {% if c.audience %}<div class="card-meta"><strong>Для кого:</strong> {{ c.audience }}</div>{% endif %}
-    <div class="card-meta"><strong>Длительность:</strong> {{ c.duration_display }}</div>
-    <div class="card-meta"><strong>Формат:</strong> {{ c.get_format_display|lower }}{% if c.format_note %} + {{ c.format_note }}{% endif %}</div>
-    {% if c.document %}<div class="card-meta"><strong>Документ:</strong> {{ c.document }}</div>{% endif %}
+    <div class="card-school">{{ c.school }}</div>
+    <div class="card-info">
+    <div class="card-chips">
+      {% if c.duration_display %}<span class="meta-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>{{ c.duration_display }}</span>{% endif %}
+      <span class="meta-chip">{% if c.format == 'webinar' %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3"/></svg>{% else %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>{% endif %}{{ c.get_format_display|lower }}{% if c.format_note %} + {{ c.format_note }}{% endif %}</span>
+    </div>
+    <div class="card-facts">
+      {% if c.audience %}<div><strong>Для кого:</strong> {{ c.audience }}</div>{% endif %}
+      {% if c.document %}<div><strong>Документ:</strong> {{ c.document }}</div>{% endif %}
+    </div>
+    </div>
     <div class="card-price">{{ c.price|default:"Цена по запросу" }}{% if c.installment %} <small>или рассрочка</small>{% endif %}</div>
-    {% if c.rating %}<div class="card-rating"><b>{{ c.rating }}</b>{% with total=c.reviews_n|add:c.school_reviews_n %}{% if total %} · {{ total }} {{ total|ru_plural:"отзыв,отзыва,отзывов" }}{% endif %}{% endwith %}</div>{% endif %}
+    <div class="card-rating{% if not c.rating %} card-rating-empty{% endif %}">{% if c.rating %}<b>{{ c.rating }}</b>{% with total=c.reviews_n|add:c.school_reviews_n %}{% if total %} · {{ total }} {{ total|ru_plural:"отзыв,отзыва,отзывов" }}{% endif %}{% endwith %}{% endif %}</div>
     <div class="card-actions">
       {% if c.details_url %}<a href="{{ c.details_url }}" target="_blank" rel="nofollow sponsored noopener" class="btn btn-primary btn-small">Подробнее</a>{% endif %}
       {% if c.reviews_n or c.school_slug %}<div class="card-reviews">
