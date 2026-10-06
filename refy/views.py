@@ -63,7 +63,7 @@ def home(request):
 
 
 def search(request):
-    q = request.GET.get('q', '').strip()[:100]
+    q = request.GET.get('q', '').replace('\x00', '').strip()[:100]
     words = [w for w in q.split() if len(w) > 1][:5]
     courses = []
     if words:
