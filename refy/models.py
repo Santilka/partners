@@ -38,7 +38,7 @@ class Section(models.Model):
     title = models.CharField('Название', max_length=120)
     slug = models.SlugField(unique=True)
     summary = models.CharField('Краткое описание', max_length=200, blank=True)
-    icon = models.FileField('Иконка', upload_to='refy/icons/', blank=True)
+    icon = models.FileField('Иконка', upload_to='icons/', blank=True)
     seo_title = models.CharField(max_length=160, blank=True)
     seo_description = models.CharField(max_length=300, blank=True)
     seo_text = models.TextField('SEO-текст (HTML)', blank=True)
@@ -108,7 +108,7 @@ class Course(models.Model):
 
     tag = models.CharField('Тег', max_length=60, blank=True)
     title = models.CharField('Название', max_length=200)
-    image = models.FileField('Картинка', upload_to='refy/courses/', blank=True)
+    image = models.FileField('Картинка', upload_to='courses/', blank=True)
     slug = models.SlugField('Адрес страницы', max_length=200, unique=True, null=True, blank=True)
     school = models.CharField('Школа', max_length=120)
     audience = models.CharField('Аудитория', max_length=120, blank=True)
@@ -223,7 +223,7 @@ class HeroSlide(models.Model):
     )
     image = models.FileField(
         'Картинка',
-        upload_to='refy/slider/',
+        upload_to='slider/',
         blank=True,
         help_text=
                 'ⓘ Рекомендуемый размер: 1920 × 720 px (пропорция 8:3), JPG/WebP, до 300–400 КБ. <br>'
