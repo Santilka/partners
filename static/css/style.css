@@ -561,7 +561,7 @@ footer a:hover{color:#fff}
   position:relative;
   z-index:2;
   width:100%;
-  padding:80px 0;
+  padding-block:80px;
   max-width:760px;
 }
 .hero-slide-content h1{
@@ -593,7 +593,25 @@ footer a:hover{color:#fff}
 }
 
 .hero-slide-content a{color:#fff;text-decoration:underline;text-underline-offset:3px}
-.hero-slide-btn{margin-top:4px}
+.hero-slide-btn{
+  margin-top:4px;
+  padding:15px 30px;
+  border-radius:999px;
+  font-weight:700;
+  letter-spacing:.01em;
+  box-shadow:0 6px 18px rgba(0,0,0,.3);
+  transition:background .2s,transform .2s,box-shadow .2s;
+}
+.hero-slide-btn::after{
+  content:"\2192";
+  font-size:1.15em;
+  line-height:1;
+  transition:transform .2s;
+}
+.hero-slide-btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(0,0,0,.35)}
+.hero-slide-btn:hover::after{transform:translateX(4px)}
+.hero-slide-btn:active{transform:translateY(0);box-shadow:0 3px 10px rgba(0,0,0,.3)}
+.hero-slide-btn:focus-visible{outline:3px solid #fff;outline-offset:3px}
 
 .hero-slider-btn{
   position:absolute;
@@ -661,10 +679,11 @@ footer a:hover{color:#fff}
 
   /* --- HERO SLIDER --- */
   .hero-slide{min-height:360px}
-  .hero-slide-inner{padding:56px 0 72px;max-width:100%}
+  .hero-slide-inner{padding-block:56px 72px;max-width:100%}
   .hero-slide-content h1{font-size:26px;margin-bottom:10px}
   .hero-slide-content h2{font-size:22px}
   .hero-slide-content p{font-size:15px;margin-bottom:18px}
+  .hero-slide-btn{padding:13px 26px;font-size:15px}
   .hero-slider-btn{display:none}
   .hero-slider-dots{bottom:14px;gap:8px}
   .hero-slider-dot{width:8px;height:8px}
