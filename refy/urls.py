@@ -11,6 +11,7 @@ urlpatterns = [
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
     path('search/', views.search, name='search'),
     path('go/<int:pk>/', views.go, name='go'),
+    path('featured/more/', views.featured_more, name='featured_more'),
     path('kursy/<slug:slug>/', views.course_detail, name='course'),
     path('shkoly/<slug:slug>/', views.school_detail, name='school'),
     path('<slug:category_slug>/', views.category, name='category'),

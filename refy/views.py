@@ -3,17 +3,21 @@ import re
 from urllib.parse import urlsplit
 
 from django.contrib.postgres.search import TrigramWordSimilarity
-from django.db.models import Case, Count, IntegerField, OuterRef, Q, Subquery, When
-from django.db.models.functions import Coalesce, Greatest
-from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.db.models import Case, CharField, Count, IntegerField, OuterRef, Q, Subquery, Value, When
+from django.db.models.functions import Cast, Coalesce, Concat, Greatest, MD5
+from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
 from django.urls import reverse
+from django.views.decorators.http import require_GET
 
 from . import seo
 from .models import Category, ClickEvent, Course, CourseSection, Review, School, SchoolReview, Section, HeroSlide
 
 HOME_TILES = 8
 FEATURED = 6
+FEATURED_MORE = 6
+SEED_RE = re.compile(r'^[0-9a-z]{4,16}$')
 SEARCH_LIMIT = 60
 BOT_MARKERS = ('bot', 'crawl', 'spider', 'slurp', 'preview', 'headless')
 WORD_RE = re.compile(r'[^\W_]+')
@@ -42,6 +46,35 @@ def random_courses(limit=FEATURED):
     if len(items) < limit:
         items += list(base.filter(tag='').order_by('?')[:limit - len(items)])
     return items
+
+
+@require_GET
+def featured_more(request):
+    seed = request.GET.get('seed', '')
+    if not SEED_RE.match(seed):
+        seed = 'x'
+    try:
+        offset = max(0, min(int(request.GET.get('offset', 0)), 100000))
+    except ValueError:
+        offset = 0
+    try:
+        n = max(1, min(int(request.GET.get('n', FEATURED_MORE)), 24))
+    except ValueError:
+        n = FEATURED_MORE
+    exclude = [int(x) for x in request.GET.get('exclude', '').split(',')[:50] if x.isdigit()]
+    qs = (
+        with_review_flags(Course.objects.filter(is_active=True).exclude(pk__in=exclude))
+        .annotate(
+            untagged=Case(When(tag='', then=1), default=0, output_field=IntegerField()),
+            shuffle=MD5(Concat(Cast('pk', CharField()), Value(seed), output_field=CharField())),
+        )
+        .order_by('untagged', 'shuffle')
+    )
+    items = list(qs[offset:offset + n])
+    html = ''.join(render_to_string('refy/_course_card.html', {'c': c}, request=request) for c in items)
+    resp = JsonResponse({'html': html, 'count': len(items), 'done': len(items) < n})
+    resp['Cache-Control'] = 'no-store'
+    return resp
 
 
 def home(request):
@@ -234,7 +267,7 @@ def go(request, pk):
 
 def robots(request):
     lines = [
-        'User-agent: *', 'Disallow: /go/', 'Disallow: /search/',
+        'User-agent: *', 'Disallow: /go/', 'Disallow: /search/', 'Disallow: /featured/',
         f"Sitemap: https://{request.get_host()}{reverse('refy:sitemap')}",
     ]
     return HttpResponse('\n'.join(lines) + '\n', content_type='text/plain')
