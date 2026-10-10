@@ -1,8 +1,10 @@
 import logging
+import re
 from urllib.parse import urlsplit
 
+from django.contrib.postgres.search import TrigramWordSimilarity
 from django.db.models import Case, Count, IntegerField, OuterRef, Q, Subquery, When
-from django.db.models.functions import Coalesce
+from django.db.models.functions import Coalesce, Greatest
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -14,6 +16,9 @@ HOME_TILES = 8
 FEATURED = 6
 SEARCH_LIMIT = 60
 BOT_MARKERS = ('bot', 'crawl', 'spider', 'slurp', 'preview', 'headless')
+WORD_RE = re.compile(r'[^\W_]+')
+FUZZY_MIN_LEN = 4
+FUZZY_SIM = 0.5
 
 log = logging.getLogger(__name__)
 
@@ -63,23 +68,38 @@ def home(request):
     })
 
 
+def stem(w):
+    n = len(w)
+    return w if n <= 4 else w[:-1] if n == 5 else w[:-2]
+
+
 def search(request):
     q = request.GET.get('q', '').replace('\x00', '').strip()[:100]
-    words = [w for w in q.split() if len(w) > 1][:5]
+    words = [w for w in WORD_RE.findall(q.lower()) if len(w) > 1][:5]
     courses = []
     if words:
+        qs = with_review_flags(Course.objects.filter(is_active=True))
         match_any = Q()
         cases = []
-        for w in words:
-            m = (
-                Q(title__icontains=w) | Q(tag__icontains=w) | Q(school__icontains=w)
-                | Q(audience__icontains=w)
-                | Q(pk__in=CourseSection.objects.filter(section__title__icontains=w).values('course_id'))
+        for i, w in enumerate(words):
+            s = stem(w)
+            in_title = Q(title__icontains=s)
+            in_other = (
+                Q(tag__icontains=s) | Q(school__icontains=s) | Q(audience__icontains=s)
+                | Q(pk__in=CourseSection.objects.filter(section__title__icontains=s).values('course_id'))
             )
+            m = in_title | in_other
+            whens = [When(in_title, then=3), When(in_other, then=2)]
+            if len(w) >= FUZZY_MIN_LEN:
+                qs = qs.annotate(**{f'sim{i}': Greatest(
+                    TrigramWordSimilarity(w, 'title'), TrigramWordSimilarity(w, 'school'))})
+                fuzzy = Q(**{f'sim{i}__gte': FUZZY_SIM})
+                m |= fuzzy
+                whens.append(When(fuzzy, then=1))
             match_any |= m
-            cases.append(Case(When(m, then=1), default=0, output_field=IntegerField()))
+            cases.append(Case(*whens, default=0, output_field=IntegerField()))
         courses = (
-            with_review_flags(Course.objects.filter(is_active=True)).filter(match_any)
+            qs.filter(match_any)
             .annotate(score=sum(cases))
             .order_by('-score', 'position', 'title')[:SEARCH_LIMIT]
         )

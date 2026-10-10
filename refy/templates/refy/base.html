@@ -30,6 +30,7 @@
       {% block nav_extra %}{% endblock %}
       <a href="#contacts">Контакты</a>
     </nav>
+    {% include 'refy/_search_form.html' %}
     <a href="{% url 'refy:home' %}#sections" class="btn btn-primary btn-small hd-cta">Подобрать курс</a>
   </div>
 </header>

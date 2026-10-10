@@ -6,7 +6,6 @@
   <div class="container">
     <a class="crumb" href="{% url 'refy:home' %}">На главную</a>
     <h1 class="section-title">Поиск курсов</h1>
-    {% include 'refy/_search_form.html' %}
     <div class="search-results">
       {% if searched %}
         {% if courses %}
