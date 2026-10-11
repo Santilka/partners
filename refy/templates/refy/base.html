@@ -64,6 +64,7 @@
   </div>
 </footer>
 <script>['pointerdown','keydown','touchstart'].forEach(function(e){addEventListener(e,function(){document.cookie='hv=1;path=/;max-age=86400;SameSite=Lax'},{once:true,capture:true})})</script>
+<script src="{% static 'js/img-loading.js' %}"></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

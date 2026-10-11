@@ -14,7 +14,6 @@ document.querySelectorAll('[data-carousel]').forEach(function (root) {
   Array.prototype.forEach.call(track.querySelectorAll('.card'), function (c, i) {
     c.dataset.i = i;
     U.push(c.cloneNode(true));
-    watchImg(c);
   });
   if (!U.length) return;
   BATCH = Math.max(12, Math.ceil(track.clientWidth / step()) * 2);
@@ -98,22 +97,10 @@ document.querySelectorAll('[data-carousel]').forEach(function (root) {
     pending = [];
   }
 
-  function watchImg(c) {
-    var m = c.querySelector('.card-media'), img = m && m.querySelector('img');
-    if (!img || img.complete) return;
-    m.classList.add('is-loading');
-    img.addEventListener('load', function () { m.classList.remove('is-loading'); }, { once: true });
-    img.addEventListener('error', function () {
-      m.classList.remove('is-loading');
-      m.classList.add('is-broken');
-    }, { once: true });
-  }
-
   function make(i) {
     var c = U[i].cloneNode(true);
     c.dataset.i = i;
     c.classList.add('shown');
-    watchImg(c);
     return c;
   }
 

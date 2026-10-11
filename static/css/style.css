@@ -700,19 +700,19 @@ footer a:hover{color:#fff}
 }
 .flip-ready .cards-carousel .card.card-skeleton{opacity:1}
 .flip-ready .cards-carousel .card.shown{opacity:1}
-.cards-carousel .card-media img{transition:transform .5s ease,opacity .4s ease}
-.cards-carousel .card-media.is-loading img{opacity:0}
-.cards-carousel .card-media.is-broken img{display:none}
-.cards-carousel .card-media.is-loading::before,.cards-carousel .card-media.is-loading::after{content:"";position:absolute;z-index:1}
-.cards-carousel .card-media.is-loading::before{
+@media (prefers-reduced-motion:no-preference){.card-media img{transition:transform .5s ease,opacity .4s ease}}
+.card-media.is-loading img{opacity:0}
+.card-media.is-broken img{display:none}
+.card-media.is-loading::before,.card-media.is-loading::after{content:"";position:absolute;z-index:1}
+.card-media.is-loading::before{
   inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.22) 50%,transparent 70%);
   background-size:220% 100%;animation:skeleton-shimmer 1.4s linear infinite;
 }
-.cards-carousel .card-media.is-loading::after{
+.card-media.is-loading::after{
   left:50%;top:50%;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;
   border:3px solid rgba(255,255,255,.35);border-top-color:#fff;animation:carousel-spin .7s linear infinite;
 }
-.cards-carousel .card-media.is-loading .card-tag{z-index:2}
+.card-media.is-loading .card-tag{z-index:2}
 .cards-carousel .card.shown{animation:card-fade .3s ease-out}
 @keyframes card-fade{from{opacity:0}to{opacity:1}}
 .skeleton-spin{
