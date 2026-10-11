@@ -721,8 +721,19 @@ footer a:hover{color:#fff}
   scroll-padding-inline:calc(var(--side) / var(--z));
 }
 @media(max-width:768px){#featured .cards-carousel .card{flex-basis:calc(82% * var(--z))}}
-#featured .carousel-prev{left:max(12px,calc(var(--side) - 64px))}
-#featured .carousel-next{right:max(12px,calc(var(--side) - 64px))}
+#featured .carousel-nav{display:flex;justify-content:center;margin-top:20px}
+#featured .carousel-pill{
+  display:inline-flex;align-items:center;padding:4px;border-radius:999px;background:#fff;
+  box-shadow:0 0 0 1px var(--line),0 6px 18px rgba(20,35,43,.08);
+}
+#featured .carousel-pill .carousel-btn{
+  position:static;transform:none;width:52px;height:40px;border-radius:999px;
+  background:transparent;box-shadow:none;color:var(--teal);
+}
+#featured .carousel-pill .carousel-btn:hover{background:var(--tint);transform:none}
+#featured .carousel-pill .carousel-btn:active{background:var(--teal);color:#fff}
+#featured .carousel-sep{width:1px;height:20px;background:var(--line);margin:0 2px}
+@media(max-width:768px){#featured .carousel-nav{display:none}}
 
 /* ==========================================================================
    RESPONSIVE (max-width: 768px)

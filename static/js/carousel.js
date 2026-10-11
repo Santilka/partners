@@ -230,6 +230,17 @@ document.querySelectorAll('[data-carousel]').forEach(function (root) {
     root.addEventListener(ev, function () { armed = true; loadMore(); }, { once: true, passive: true });
   });
 
+  var nav = document.createElement('div'), pill = document.createElement('div'), sep = document.createElement('span');
+  nav.className = 'carousel-nav';
+  pill.className = 'carousel-pill';
+  sep.className = 'carousel-sep';
+  sep.setAttribute('aria-hidden', 'true');
+  pill.appendChild(prev);
+  pill.appendChild(sep);
+  pill.appendChild(next);
+  nav.appendChild(pill);
+  root.after(nav);
+
   prev.disabled = next.disabled = false;
   root.classList.add('has-prev', 'has-next');
   growLeft();
