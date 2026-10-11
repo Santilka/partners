@@ -8,9 +8,17 @@ document.querySelectorAll('[data-carousel]').forEach(function (root) {
   var seed = Math.random().toString(36).slice(2, 12);
   var offset = 0, loading = false, exhausted = !url, armed = false, idleTimer = 0;
   var U = [], pending = [];
+  var reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var driftSpeed = reduceMotion ? 0 : (root.dataset.drift === undefined ? 30 : +root.dataset.drift || 0);
+  var drift = driftSpeed > 0;
+  var baseSnap = drift ? 'none' : '', baseBehavior = drift ? 'auto' : '';
+  var pos = 0, lastApplied = 0, pausedUntil = 0, last = 0;
+  var hover = false, touching = false, visible = false, started = false;
 
   track.style.position = 'relative';
   track.style.overflowAnchor = 'none';
+  track.style.scrollSnapType = baseSnap;
+  track.style.scrollBehavior = baseBehavior;
   Array.prototype.forEach.call(track.querySelectorAll('.card'), function (c, i) {
     c.dataset.i = i;
     U.push(c.cloneNode(true));
@@ -27,10 +35,57 @@ document.querySelectorAll('[data-carousel]').forEach(function (root) {
 
   function go(dir) {
     armed = true;
+    pause(4000);
     fill();
-    var s = step();
-    var n = Math.max(1, Math.floor(track.clientWidth / s));
-    track.scrollBy({ left: dir * n * s, behavior: 'smooth' });
+    var pad = parseFloat(getComputedStyle(track).scrollPaddingLeft) || 0;
+    var x = track.scrollLeft + pad, cards = track.children, best = 0, bd = Infinity;
+    for (var i = 0; i < cards.length; i++) {
+      var d = Math.abs(cards[i].offsetLeft - x);
+      if (d < bd) { bd = d; best = i; } else if (cards[i].offsetLeft > x) break;
+    }
+    var n = Math.max(1, Math.floor(track.clientWidth / step()));
+    var j = Math.max(0, Math.min(cards.length - 1, best + dir * n));
+    track.scrollTo({ left: cards[j].offsetLeft - pad, behavior: 'smooth' });
+  }
+
+  function now() { return performance.now(); }
+
+  function pause(ms) { pausedUntil = Math.max(pausedUntil, now() + ms); }
+
+  function tick(t) {
+    requestAnimationFrame(tick);
+    var dt = Math.min(t - last, 50);
+    last = t;
+    if (!visible || document.hidden || hover || touching || now() < pausedUntil) return;
+    var cur = track.scrollLeft;
+    if (Math.abs(cur - lastApplied) > 1.5) pos = cur;
+    pos = Math.min(pos + driftSpeed * dt / 1000, track.scrollWidth - track.clientWidth);
+    track.scrollLeft = pos;
+    lastApplied = track.scrollLeft;
+  }
+
+  function initDrift() {
+    if (!drift || !('IntersectionObserver' in window)) return;
+    new IntersectionObserver(function (es) {
+      visible = es[0].isIntersecting;
+      if (visible && !started) {
+        started = true;
+        armed = true;
+        loadMore();
+        pause(1500);
+      }
+    }).observe(root);
+    root.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') hover = true; });
+    root.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse') hover = false; });
+    root.addEventListener('touchstart', function () { touching = true; }, { passive: true });
+    ['touchend', 'touchcancel'].forEach(function (ev) {
+      root.addEventListener(ev, function () { touching = false; pause(2500); }, { passive: true });
+    });
+    ['wheel', 'keydown'].forEach(function (ev) {
+      root.addEventListener(ev, function () { pause(2500); }, { passive: true });
+    });
+    last = now();
+    requestAnimationFrame(tick);
   }
 
   var snapHold = 0, lock = 0;
@@ -43,7 +98,7 @@ document.querySelectorAll('[data-carousel]').forEach(function (root) {
   function releaseSnap() {
     if (--snapHold <= 0) {
       snapHold = 0;
-      track.style.scrollSnapType = '';
+      track.style.scrollSnapType = baseSnap;
     }
   }
 
@@ -66,10 +121,11 @@ document.querySelectorAll('[data-carousel]').forEach(function (root) {
     lock++;
     holdSnap();
     fn();
+    pos = lastApplied = track.scrollLeft;
     requestAnimationFrame(function () {
       requestAnimationFrame(function () {
         releaseSnap();
-        if (--lock === 0) track.style.scrollBehavior = '';
+        if (--lock === 0) track.style.scrollBehavior = baseBehavior;
       });
     });
   }
@@ -196,6 +252,7 @@ document.querySelectorAll('[data-carousel]').forEach(function (root) {
   }
 
   function onScroll() {
+    if (drift && Math.abs(track.scrollLeft - lastApplied) > 1.5) pause(2000);
     if (!armed) return;
     var w = track.clientWidth, st = step(), s = track.scrollLeft, r = track.scrollWidth - s - w;
     var lim = Math.max(w, st * 5);
@@ -245,4 +302,5 @@ document.querySelectorAll('[data-carousel]').forEach(function (root) {
   root.classList.add('has-prev', 'has-next');
   growLeft();
   initFlip();
+  initDrift();
 });
