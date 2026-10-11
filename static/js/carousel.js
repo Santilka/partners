@@ -16,8 +16,8 @@ document.querySelectorAll('[data-carousel]').forEach(function (root) {
     U.push(c.cloneNode(true));
   });
   if (!U.length) return;
-  BATCH = Math.max(6, Math.ceil(track.clientWidth / step()) * 2);
-  MAXCARDS = BATCH * 5;
+  BATCH = Math.max(12, Math.ceil(track.clientWidth / step()) * 2);
+  MAXCARDS = BATCH * 20;
 
   function step() {
     var card = track.querySelector('.card');
@@ -100,8 +100,7 @@ document.querySelectorAll('[data-carousel]').forEach(function (root) {
   function make(i) {
     var c = U[i].cloneNode(true);
     c.dataset.i = i;
-    c.classList.add('flipped');
-    flipHold(c);
+    c.classList.add('shown');
     return c;
   }
 
@@ -188,19 +187,20 @@ document.querySelectorAll('[data-carousel]').forEach(function (root) {
       });
   }
 
-  function fill(k) {
-    var w = track.clientWidth;
+  function fill(urgent) {
+    var w = track.clientWidth, st = step();
     if (!w) return;
-    k = typeof k === 'number' ? k : 1.5;
-    if (track.scrollLeft < w * k) growLeft();
-    if (track.scrollWidth - track.scrollLeft - w < w * k) growRight();
+    var lim = urgent ? Math.max(w, st * 5) : Math.max(w * 2, st * 8);
+    if (track.scrollLeft < lim) growLeft();
+    if (track.scrollWidth - track.scrollLeft - w < lim) growRight();
   }
 
   function onScroll() {
     if (!armed) return;
-    var w = track.clientWidth, s = track.scrollLeft, r = track.scrollWidth - s - w;
+    var w = track.clientWidth, st = step(), s = track.scrollLeft, r = track.scrollWidth - s - w;
+    var lim = Math.max(w, st * 5);
     clearTimeout(idleTimer);
-    if (s < w * 0.75 || r < w * 0.75) fill(0.75);
+    if (s < lim || r < lim) fill(true);
     else idleTimer = setTimeout(fill, 100);
   }
 
