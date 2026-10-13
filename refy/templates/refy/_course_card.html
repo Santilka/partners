@@ -4,7 +4,7 @@
     {% if c.tag %}<span class="card-tag">{{ c.tag }}</span>{% endif %}
   </div>
   <div class="card-body">
-    <h3><a href="{{ c.get_absolute_url }}" style="color:inherit;text-decoration:none">{{ c.title }}</a></h3>
+    <h3><a href="{{ c.get_absolute_url }}">{{ c.title }}</a></h3>
     <div class="card-school">{{ c.school }}</div>
     <div class="card-info">
     <div class="card-chips">

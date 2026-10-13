@@ -7,6 +7,7 @@
 <section class="hero">
   <div class="container hero-grid">
     <div>
+      <span class="eyebrow">Каталог</span>
       <h1>Найди свой курс</h1>
       <p class="hero-sub">Честный каталог: цены, отзывы и практика в одном месте. Введите профессию или тему и сравните программы.</p>
     </div>
@@ -25,6 +26,7 @@
 {% if featured %}
 <section id="featured" class="alt">
   <div class="container">
+    <span class="eyebrow">Подборка</span>
     <h2 class="section-title">Подборка курсов</h2>
     <p class="section-sub">Случайные курсы из каталога</p>
     <div class="carousel" data-carousel data-more-url="{% url 'refy:featured_more' %}" data-ids="{% for c in featured %}{{ c.pk }}{% if not forloop.last %},{% endif %}{% endfor %}">
@@ -39,6 +41,7 @@
 {% endif %}
 <section id="sections">
   <div class="container">
+    <span class="eyebrow">Направления</span>
     {% for g in groups %}
     <div class="cat-block">
       <h2 class="section-title"><a href="{{ g.category.get_absolute_url }}">{{ g.category.title }}</a></h2>

@@ -24,6 +24,7 @@
 {% if courses %}
 <section id="compare">
   <div class="container">
+    <span class="eyebrow">Сравнение</span>
     <h2 class="section-title">Сравнение курсов</h2>
     <p class="compare-hint">Нажмите на строку, чтобы открыть страницу курса</p>
     <div class="compare-outer">
@@ -44,6 +45,7 @@
 {% if reviews %}
 <section class="alt">
   <div class="container">
+    <span class="eyebrow">Отзывы</span>
     <h2 class="section-title">Отзывы студентов</h2>
     <div class="reviews-grid">
       {% for r in reviews %}
@@ -61,6 +63,7 @@
 {% if faqs %}
 <section id="faq" class="alt">
   <div class="container narrow">
+    <span class="eyebrow">FAQ</span>
     <h2 class="section-title">Частые вопросы</h2>
     {% for f in faqs %}
     <details class="faq-item"><summary class="faq-question">{{ f.question }}</summary><div class="faq-answer">{{ f.answer|linebreaksbr }}</div></details>
