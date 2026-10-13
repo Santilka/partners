@@ -25,13 +25,24 @@
 <header>
   <div class="container header-inner">
     <a href="{% url 'refy:home' %}" class="logo">Каталог курсов</a>
-    <nav aria-label="Основное меню">
-      <a href="{% url 'refy:home' %}#sections">Разделы</a>
-      {% block nav_extra %}{% endblock %}
-      <a href="#contacts">Контакты</a>
-    </nav>
-    {% include 'refy/_search_form.html' %}
-    <a href="{% url 'refy:home' %}#sections" class="btn btn-primary btn-small hd-cta">Подобрать курс</a>
+    
+    <!-- Кнопка бургера (видна только на мобильных) -->
+    <button class="menu-toggle" aria-label="Открыть меню" aria-expanded="false" aria-controls="mobile-menu">
+      <span></span><span></span><span></span>
+    </button>
+
+    <!-- Обертка для мобильного меню -->
+    <div class="mobile-menu" id="mobile-menu">
+      <nav aria-label="Основное меню">
+        <a href="{% url 'refy:home' %}#sections">Разделы</a>
+        {% block nav_extra %}{% endblock %}
+        <a href="#contacts">Контакты</a>
+      </nav>
+      {% include 'refy/_search_form.html' %}
+    </div>
+
+    <!-- CTA кнопка остается снаружи, чтобы быть видимой всегда -->
+    <a href="{% url 'refy:home' %}#sections" class="btn btn-primary btn-small hd-cta"><span class="hd-cta-text">Подобрать курс</span></a>
   </div>
 </header>
 {% block content %}{% endblock %}

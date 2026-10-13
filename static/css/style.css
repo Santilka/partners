@@ -155,7 +155,8 @@ header .header-inner{
 @media(min-width:769px){
   header+.hero-slider,header+.hero{margin-top:-80px}
   header+.hero{padding-top:calc(clamp(72px,9vw,128px) + 80px)}
-  header+.hero-slider .hero-slide{min-height:560px}
+  header+.hero-slider .hero-slide{min-height:clamp(560px, 78vh, 760px)}
+  /*header+.hero-slider .hero-slide{min-height:680px}*/
   header+.hero-slider .hero-slide-inner{padding-top:176px}
   header+.hero-slider .hero-slider-btn{top:calc(50% + 40px)}
 }
@@ -856,6 +857,54 @@ footer a:hover{color:#fff}
 #featured .carousel-sep{width:1px;height:20px;background:var(--line);margin:0 2px}
 @media(max-width:768px){#featured .carousel-nav{display:none}}
 
+/* =========================================
+   Бургер-меню для мобильных
+   ========================================= */
+
+/* Кнопка бургера — скрыта на десктопе */
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-left: auto; /* Прижимаем к правому краю */
+  border-radius: 50%;
+  transition: background-color 0.3s var(--ease);
+}
+.menu-toggle:hover {
+  background: var(--tint);
+}
+.menu-toggle span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--ink);
+  border-radius: 2px;
+  transition: transform 0.3s var(--ease), opacity 0.3s var(--ease);
+  margin: 0 auto;
+}
+/* Анимация в крестик при открытии */
+.menu-toggle[aria-expanded="true"] span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.menu-toggle[aria-expanded="true"] span:nth-child(2) {
+  opacity: 0;
+}
+.menu-toggle[aria-expanded="true"] span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* Обертка мобильного меню — по умолчанию прозрачна для десктопа */
+.mobile-menu {
+  display: contents; /* На десктопе дети ведут себя как прямые дети header-inner */
+}
+
 /* mobile */
 @media(max-width:768px){
   :root{
@@ -867,22 +916,83 @@ footer a:hover{color:#fff}
     --header-h:84px;
   }
 
-  header{padding-top:10px}
+  /* =========================================
+     Шапка на мобильных: плоская полоса сверху,
+     при скролле превращается в плавающую пилюлю
+     (та же логика, что и на десктопе)
+     ========================================= */
+  header{
+    height:72px;
+    padding:0;
+  }
+  header::before,header::after{
+    content:"";
+    position:absolute;
+    z-index:0;
+    pointer-events:none;
+  }
+  header::before{
+    inset:0;
+    background:linear-gradient(var(--hair),var(--hair)) bottom/100% 1px no-repeat,#fff;
+    clip-path:inset(0 0 0 0 round 0px);
+  }
+  header::after{
+    top:10px;bottom:10px;
+    left:var(--gap);
+    right:var(--gap);
+    border-radius:28px;
+    background:rgba(255,255,255,.96);
+    box-shadow:0 0 0 1px var(--hair),0 16px 36px -16px rgba(12,47,48,.28),inset 0 1px 0 #fff;
+    opacity:0;
+  }
+  @supports (backdrop-filter:blur(1px)){
+    header::after{
+      background:rgba(255,255,255,.7);
+      -webkit-backdrop-filter:blur(20px) saturate(1.5);
+      backdrop-filter:blur(20px) saturate(1.5);
+    }
+  }
   header .header-inner{
-    flex-wrap:wrap;gap:8px 12px;width:100%;
-    padding:10px 12px 10px 18px;border-radius:26px;
+    position:relative;z-index:1;
+    width:100%;
+    height:72px;
+    margin:0 auto;
+    padding:0 var(--gap);
+    border-radius:0;
+    background:none;
+    box-shadow:none;
+    -webkit-backdrop-filter:none;backdrop-filter:none;
+    flex-wrap:nowrap;
+    gap:8px;
+    justify-content:space-between;
+    align-items:center;
   }
-  .hd-cta{margin-left:auto}
-  nav{
-    order:3;width:100%;margin-left:0;
-    overflow-x:auto;gap:4px;white-space:nowrap;font-size:14px;
-    scrollbar-width:none;
+  header.is-scrolled .header-inner{
+    /* логотип и бургер съезжают внутрь пилюли */
+    padding-inline:calc(var(--gap) + 14px);
   }
-  nav::-webkit-scrollbar{display:none}
-  nav a{padding:6px 12px}
+  header.is-scrolled::before{
+    clip-path:inset(10px var(--gap) 10px var(--gap) round 28px);
+    opacity:0;
+  }
+  header.is-scrolled::after{opacity:1}
 
-  .search,.search:focus-within{order:2;width:100%}
-  .search input{padding:10px 44px 10px 16px;font-size:16px}
+  header.hdr-ready .header-inner{transition:padding .7s var(--ease)}
+  header.hdr-ready::before{transition:clip-path .7s var(--ease),opacity .01s}
+  header.hdr-ready::after{transition:opacity .25s ease}
+  header.hdr-ready.is-scrolled::before{transition:clip-path .7s var(--ease),opacity .3s ease .4s}
+  header.hdr-ready.is-scrolled::after{transition:opacity .35s ease .35s}
+
+  /* Скрываем CTA-кнопку на мобильных */
+  .hd-cta{
+    display:none;
+  }
+
+  /* Прячем навигацию и поиск из основного потока — они уйдут в .mobile-menu */
+  header .header-inner > nav,
+  header .header-inner > .search{
+    display:none;
+  }
 
   .eyebrow{display:flex;width:max-content;margin-inline:auto;margin-bottom:14px}
 
@@ -990,7 +1100,89 @@ footer a:hover{color:#fff}
   .cta .btn{width:100%}
   footer{border-radius:28px 28px 0 0;padding-top:56px}
   .footer-grid{grid-template-columns:1fr 1fr;gap:32px}
+
+  /* Выпадающее мобильное меню */
+  .mobile-menu{
+    display:none;
+    position:absolute;
+    top:calc(100% + 8px);
+    left:var(--gap);
+    right:var(--gap);
+    background:var(--surface);
+    padding:20px;
+    border-radius:var(--radius);
+    box-shadow:0 0 0 1px var(--hair),0 24px 48px -16px rgba(12,47,48,.35);
+    flex-direction:column;
+    gap:16px;
+    z-index:99;
+  }
+  header.is-scrolled .mobile-menu{top:calc(100% + 4px)}
+  .mobile-menu.is-open{
+    display:flex;
+    animation:menu-in .3s var(--ease);
+  }
+  @keyframes menu-in{
+    from{opacity:0;transform:translateY(-8px)}
+    to{opacity:1;transform:none}
+  }
+
+  /* Навигация внутри меню */
+  .mobile-menu nav{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    margin-left:0;
+    width:100%;
+    overflow:visible;
+    white-space:normal;
+  }
+  .mobile-menu nav a{
+    font-size:16px;
+    padding:12px 16px;
+    background:var(--bg);
+    border-radius:12px;
+    text-align:left;
+    color:var(--ink);
+    font-weight:500;
+  }
+  .mobile-menu nav a:hover{
+    background:var(--tint);
+    color:var(--teal-d);
+  }
+
+  /* Поиск внутри меню */
+  .mobile-menu .search{
+    width:100%;
+    order:initial;
+  }
+  .mobile-menu .search input{
+    width:100%;
+    padding:12px 44px 12px 16px;
+    font-size:16px;
+    background:var(--bg);
+  }
+
+  /* Показываем бургер */
+  .menu-toggle{
+    display:flex;
+  }
+
+  /* hero-slider на мобильных: заезжает под шапку, чтобы белая полоса не была видна */
+  header + .hero-slider,
+  header + .hero{
+    margin-top:-72px;
+  }
+  header + .hero{
+    padding-top:calc(40px + 72px);
+  }
+  header + .hero-slider .hero-slide{
+    min-height:520px;
+  }
+  header + .hero-slider .hero-slide-inner{
+    padding-top:calc(72px + 32px);
+  }
 }
+
 
 @media(hover:hover){
   .compare-table tbody tr:hover td{background:#fafbfa}
